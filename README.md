@@ -7,6 +7,16 @@ This package is not yet in the registry, but it can be added with the command:
 
 ```
 
+# Authors
+Contributors to this project include:
+* Gideon Simpson 
+* Petr Plechac
+* Jerome Troy
+* Liam Doherty
+* Hunter Wages
+
+# Acknowledgements
+This work was supported in part by the ARO Cooperative Agreement W911NF2220234.
 
 # References
 This package was motivated by the following publications:
