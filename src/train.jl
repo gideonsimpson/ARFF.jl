@@ -315,7 +315,7 @@ function train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, batch_si
 end
 
 """
-    train_rwm(F₀::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, Σ::TM, options::ARFFOptions) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
+    train_rwm(F₀::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy.  Returns the entire trajectory of models during training.

@@ -9,14 +9,29 @@ struct FourierModel{TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
     ω::Vector{TW}
 end
 
+"""
+    Base.length(F::TF) where {TF<:FourierModel}
+
+TBW
+"""
 function Base.length(F::TF) where {TF<:FourierModel}
     return length(F.β)
 end
 
+"""
+    Base.isempty(F::TF) where {TF<:FourierModel}
+
+TBW
+"""
 function Base.isempty(F::TF) where {TF<:FourierModel}
     return isempty(F.β)
 end
 
+"""
+    Base.iterate(F::TF, state=1) where {TF<:FourierModel}
+
+TBW
+"""
 function Base.iterate(F::TF, state=1) where {TF<:FourierModel}
     if state > length(F)
         return nothing
@@ -42,14 +57,29 @@ function DataSet(x::Vector{TW}, y::Vector{TR}) where {TR<:AbstractFloat,TW<:Abst
     return DataSet(x, Complex.(y))
 end
 
+"""
+    Base.length(D::TD) where {TD<:DataSet}
+
+TBW
+"""
 function Base.length(D::TD) where {TD<:DataSet}
     return length(D.x)
 end
 
+"""
+    Base.isempty(D::TD) where {TD<:DataSet}
+
+TBW
+"""
 function Base.isempty(D::TD) where {TD<:DataSet}
     return isempty(D.x)
 end
 
+"""
+    Base.iterate(D::TD, state=1) where {TD<:DataSet}
+
+TBW
+"""
 function Base.iterate(D::TD, state=1) where {TD<:DataSet}
     if state > length(D)
         return nothing
