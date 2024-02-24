@@ -1,5 +1,5 @@
 push!(LOAD_PATH,"../src/")
-using BasicMD
+using ARFF
 using Documenter
 makedocs(
          sitename = "ARFF.jl",
