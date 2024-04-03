@@ -6,3 +6,6 @@ Documentation for the adaptive random fourier features package.
 TBW
 
 ## References
+```@bibliography
+*
+```
