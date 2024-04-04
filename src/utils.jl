@@ -2,7 +2,7 @@
 """
     optimal_γ(d::Integer)
 
-Compute the optimal γ parameter as a function of dimension
+Compute the optimal γ parameter as a function of dimension `d`
 """
 function optimal_γ(d::Integer)
     return 3 * d - 2
@@ -47,7 +47,9 @@ end
 """
     get_scalings(data::DataSet{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
 
-Find the means and variances of the data for scaling.
+Find the means and variances of the data for scaling
+### Fields
+* `data` - The training data set
 """
 function get_scalings(data::DataSet{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
     μx = mean(data.x)
@@ -62,6 +64,9 @@ end
     scale_data!(data::DataSet{TB,TR,TW}, scalings::DataScalings{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
 
 Scale the data set (in-place) according to the specified scalings
+### Fields
+* `data` - Data set to be scale
+* `scalings` - Scalings to apply to `data`
 """
 function scale_data!(data::DataSet{TB,TR,TW}, scalings::DataScalings{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
 
@@ -77,6 +82,9 @@ end
     rescale_data!(data::DataSet{TB,TR,TW}, scalings::DataScalings{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
 
 Rescale the data set (in-place) according back to the original units
+### Fields
+* `data` - Data set to be scale
+* `scalings` - Scalings to apply to `data`
 """
 function rescale_data!(data::DataSet{TB,TR,TW}, scalings::DataScalings{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
 

@@ -5,6 +5,14 @@
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy
+
+### Fields
+* `F` - The `FourierModel` to be trained
+* `data`- The `DataSet` training data
+* `Σ` - Initial covariance matrix for RWM proposals
+* `options` - `ARFFOptions` structure specifcying the number epochs, proposal step size, etc.
+* `show_progress=true` - Display training progress using `ProgressMeter`
+* `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
@@ -107,6 +115,14 @@ end
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy with batched data, which is cycled through from epoch to epoch.
+
+### Fields
+* `F` - The `FourierModel` to be trained
+* `batched_data`- A vector of `DataSet` training data sets, for the purpose of minibatching.  These are presumed to all be the same size.
+* `Σ` - Initial covariance matrix for RWM proposals
+* `options` - `ARFFOptions` structure specifcying the number epochs, proposal step size, etc.
+* `show_progress=true` - Display training progress using `ProgressMeter`
+* `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_rwm!(F::FourierModel{TB,TR,TW}, batched_data::Vector{DataSet{TB,TR,TW}}, Σ::TM, options::ARFFOptions; show_progress=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
@@ -211,7 +227,14 @@ end
     train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
 
 Train the Fourier feature model using a random walk Metropolis exploration
-strategy
+strategy with minibatching, randomly subsampling at each epoch.
+
+* `F` - The `FourierModel` to be trained
+* `batch_size`- Minibatch size
+* `Σ` - Initial covariance matrix for RWM proposals
+* `options` - `ARFFOptions` structure specifcying the number epochs, proposal step size, etc.
+* `show_progress=true` - Display training progress using `ProgressMeter`
+* `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
 
