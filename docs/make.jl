@@ -1,4 +1,6 @@
-push!(LOAD_PATH,"../src/")
+# push!(LOAD_PATH,"../src/")
+using Pkg
+Pkg.develop(path="../../ARFF.jl/")
 using ARFF
 using Documenter
 using DocumenterCitations
