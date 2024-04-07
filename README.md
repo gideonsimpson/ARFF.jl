@@ -1,4 +1,7 @@
 # ARFF.jl
+
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://gideonsimpson.github.io/ARFF.jl/dev)
+
 Adaptive Random Fourier Features in Julia
 
 This package is not yet in the registry, but it can be added with the command:
