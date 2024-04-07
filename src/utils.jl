@@ -3,6 +3,8 @@
     optimal_γ(d::Integer)
 
 Compute the optimal γ parameter as a function of dimension `d`
+### Fields
+* `d` - the dimension of the x coordinate
 """
 function optimal_γ(d::Integer)
     return 3 * d - 2

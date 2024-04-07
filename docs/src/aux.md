@@ -4,4 +4,6 @@
 TBW
 
 ## Loss Function
-TBW
+```@docs
+ARFF.mse_loss
+```
