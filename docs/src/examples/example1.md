@@ -38,20 +38,16 @@ xlabel!("x")
 array of scalars.  We also do not require [`DataScalings`](@ref) for this
 problem.
 
-```@example ex1
-println(x[1:5])
-```
-
 ## Initialize Fourier Model
 Next, we need to initialize our [`FourierModel`](@ref)
 ```@example ex1
-K = 2^6;
+K = 2^7;
 Random.seed!(200); # for reproducibility
 F0 = FourierModel([1. *randn(ComplexF64) for _ in 1:K],  
     [randn(d) for _ in 1:K]); nothing
 ```
 
-## Set Parameters and Trai
+## Set Parameters and Train
 ```@example ex1
 δ = 10.; # rwm step size
 λ = 1e-8; # regularization
