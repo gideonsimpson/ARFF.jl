@@ -10,7 +10,7 @@ This is implemented to handle the training data in several ways:
 ```@docs
     train_rwm!
 ```
-Having created an initialwe can then call
+Having created an initial `F` we can then call
 ```
 Σ_mean, acceptance_rate, loss = train_rwm!(F, data, Σ0, opts);
 ```

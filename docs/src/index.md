@@ -18,7 +18,7 @@ naive random Fourier featuer setting, the ``\omega_k`` are sampled from some
 known distribution ``\mu``, and the ``\beta_k`` are obtained by classical least
 squares regression or ridge regression,
 ```math
-(S^\ast S + N \lambda I)\beta = S^\ast y,
+({S^\ast}S + N \lambda I)\boldsymbol{\beta} = S^\ast \boldsymbol{y},
 ```
 where the design matrix, ``S``, is ``N\times K``, with entries
 ```math
@@ -30,16 +30,20 @@ Other solutions are possible.
 ### Adaptivity
 To make the algorithm adaptive, that is to say, to sample the frequencies from
 an _optimal_ distribution, we use a Random Walk Metropolis scheme described in
-[kammonen_adaptive_2020](@cite).  The strategy is as follows:
+[kammonen_adaptive_2020](@cite).  The goal is to sample from the variance
+minimizing distribution, known to be ``\propto |\hat{f}(\omega)|``.
 
-#### Proposal
+
+The strategy is as follows:
+
+#### Generate Proposal
 Perturb the vector ``\boldsymbol{\omega}`` of wave numbers with a Gaussian,
 ```math
 \boldsymbol{\omega}' = \boldsymbol{\omega} + \delta \boldsymbol{\xi}, \quad \boldsymbol{\xi}\sim N(0, \Sigma)
 ```
 where ``\delta>0`` is a proposal step size and  ``\Sigma`` is a covariance matrix. 
 
-#### Recompuote Amplitudes
+#### Update Amplitudes
 Compute the proposed amplitudes, ``\boldsymbol{\beta}`` for the perturbed wave numbers, by building up the new design matrix and solving the linear system. 
 
 #### Accept/Reject

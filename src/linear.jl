@@ -18,11 +18,16 @@ end
 
 
 """
-    solve_normal_equations!(β::Vector{TY}, S::TS, y_data::Vector{TY}, λ::TL) where {TS<:Matrix,TY<:Complex, TL<:AbstractFloat}
+    solve_normal!(β, S, y_data; λ = 1e-8)
 
 Solve the regularized linear system using the normal equations.
+### Fields
+* `β` - The vector of coefficients that will be obtained
+* `S` - The design matrix
+* `y_data` - y coordinates
+* `λ = 1e-8` - Regularization parameter
 """
-function solve_normal_equations!(β::Vector{TY}, S::TS, y_data::Vector{TY}, λ::TL) where {TS<:Matrix,TY<:Complex,TL<:AbstractFloat}
+function solve_normal!(β::Vector{TY}, S::TS, y_data::Vector{TY}, λ=1e-8) where {TS<:Matrix,TY<:Complex}
     N = length(y_data)
     
     β .= (S' * S + λ * N * I) \ (S' * y_data)
@@ -32,11 +37,16 @@ end
 
 
 """
-    solve_svd!β::Vector{TY}, S::TS, y_data::Vector{TY}, λ::TL) where {TS<:Matrix,TY<:Complex,TL<:AbstractFloat}
+    solve_normal_svd!(β, S, y_data; λ = 1e-8)
 
 Solve the regularized linear system using the SVD.
+### Fields
+* `β` - The vector of coefficients that will be obtained
+* `S` - The design matrix
+* `y_data` - y coordinates
+* `λ = 1e-8` - Regularization parameter
 """
-function solve_svd!(β::Vector{TY}, S::TS, y_data::Vector{TY}, λ::TL) where {TS<:Matrix,TY<:Complex,TL<:AbstractFloat}
+function solve_normal_svd!(β::Vector{TY}, S::TS, y_data::Vector{TY}; λ=1e-8) where {TS<:Matrix,TY<:Complex}
 
     F = svd(S)
     N = length(y_data)

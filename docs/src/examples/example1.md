@@ -60,13 +60,7 @@ adapt_covariance = true;
 
 Σ0 = ones(1,1);
 
-function reg_β_solver!(β, S, y, λ)
-    N = length(y);
-    β .= (S' * S + λ * N *I) \ (S' * y)
-
-end
-
-β_solver! = (β, S, y, ω)-> reg_β_solver!(β, S, y, λ);
+β_solver! = (β, S, y, ω)-> solve_normal!(β, S, y, λ);
 
 opts = ARFFOptions(n_epochs, n_ω_steps, δ, n_burn, γ, ω_max,adapt_covariance, 
     β_solver!, ARFF.mse_loss);

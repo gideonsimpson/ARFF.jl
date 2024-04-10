@@ -15,6 +15,7 @@ include("loss.jl")
 
 export FourierModel, DataSet, ARFFOptions, DataScalings
 export train_rwm, train_rwm!
+export solve_normal!, solve_normal_svd!
 export optimal_γ, get_scalings, scale_data!,rescale_data!, convert_problem, convert_dataset
 
 

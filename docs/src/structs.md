@@ -118,31 +118,29 @@ n_burn = 100;
 ω_max =Inf;
 adapt_covariance = true;
 
-# solve the  normal equations
-function reg_β_solver!(β, S, y, λ)
-    N = length(y);
-    β .= (S' * S + λ * N *I) \ (S' * y);
-    β
-end
+β_solver! = (β, S, y, ω)-> solve_normal!(β, S, y, λ);
 
 linear_solve! = (β, S, y, ω)-> reg_β_solver!(β, S, y, λ);
 
 opts = ARFFOptions(n_epochs, n_ω_steps, δ, n_burn, γ, ω_max, adapt_covariance, 
     linear_solve!, ARFF.mse_loss);
 ```
-The linear solver type is typed as:
+The linear solver is typed as:
 ```
 function linear_solve!(β, S, y, ω)
     # in place solver code...
 end
 ```
 which is to say, it can depend on the design matrix ``S``, the response
-variables, ``y``, and, potentially, the current set of wave numbers, ``ω``.
+variables, ``y``, and, potentially, the current set of wave numbers, ``ω``.  See [Linear Algebra](@ref linalg) for addititional details.
+
 The `loss` function is to be typed as:
 ```
 function loss(F, x, y)
     # compute and return loss function...
 end
 ```
+See [Loss](@ref loss) for addititional details.
+
 The `γ` parameter can be set using [`optimal_γ`](@ref), which, in a certain
 regime, is the optimal value for given dimension, `d` when ``x\in\mathbb{R}^d``.

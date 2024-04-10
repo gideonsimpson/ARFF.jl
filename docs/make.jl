@@ -25,8 +25,7 @@ makedocs(checkdocs=:none,
         "Home" => "index.md",
         "Structures" => "structs.md",
         "Training" => "train.md",
-        "Auxiliary Functions"=>"aux.md",
-        "Utilities"=>"utils.md",
+        "Auxiliary Functions and Utilities"=>"aux.md",
         "Examples"=>["examples/example1.md"]
     ])
 deploydocs(;
