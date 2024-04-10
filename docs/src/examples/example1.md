@@ -9,7 +9,7 @@ where ``\mathrm{Si}`` is the [Sine integral](https://en.wikipedia.org/wiki/Trigo
 
 ## Generate Training Data
 First, we will generate and visualize the training data:
-```@example 1
+```@example ex1
 using SpecialFunctions
 using Random
 using Plots
@@ -40,15 +40,15 @@ problem.
 
 ## Initialize Fourier Model
 Next, we need to initialize our [`FourierModel`](@ref)
-```@example 1
+```@example ex1
 K = 2^6;
 Random.seed!(200); # for reproducibility
 F0 = FourierModel([1. *randn(ComplexF64) for _ in 1:K],  
     [randn(d) for _ in 1:K]); nothing
-```s
+```
 
-## Set Parameters and Train
-```@example 1
+## Set Parameters and Trai
+```@example ex1
 δ = 10.; # rwm step size
 λ = 1e-8; # regularization
 n_epochs = 10^3; # number of epochs
@@ -71,13 +71,13 @@ F = deepcopy(F0);
 ```
 ## Evaluate Results
 Looking at the trianing loss, we see the model appears to be well trained for the selected width, ``K``:
-```@example 1
+```@example ex1
 plot(1:length(loss), loss, yscale=:log10, label="")
 xlabel!("Epoch")
 ylabel!("Loss")
 ```
 Next, we can verify that we have a high quality approximation of the true ``f(x)``:
-```@example 1
+```@example ex1
 xx = LinRange(0, .1, 500);
 scatter([x_[1] for x_ in x], y, label="Sample Points", legend=:right)
 plot!(xx, f.(xx), label = "Truth" )
@@ -86,7 +86,7 @@ plot!(xx, imag.([F([x_]) for x_ in xx]),label="Learned Model (Imaginary Part)" )
 xlabel!("x")
 ```
 We can also verify that the training data is well fit:
-```@example 1
+```@example ex1
 scatter(real.(data.y),real.(F.(data.x)),label="Training Data")
 xx = LinRange(0,2,100);
 plot!(xx, xx, ls=:dash, label="")
