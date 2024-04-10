@@ -38,6 +38,10 @@ xlabel!("x")
 array of scalars.  We also do not require [`DataScalings`](@ref) for this
 problem.
 
+```@example ex1
+println(x[1:5])
+```
+
 ## Initialize Fourier Model
 Next, we need to initialize our [`FourierModel`](@ref)
 ```@example ex1
@@ -60,7 +64,7 @@ adapt_covariance = true;
 
 Σ0 = ones(1,1);
 
-β_solver! = (β, S, y, ω)-> solve_normal!(β, S, y, λ);
+β_solver! = (β, S, y, ω)-> solve_normal!(β, S, y, λ=λ);
 
 opts = ARFFOptions(n_epochs, n_ω_steps, δ, n_burn, γ, ω_max,adapt_covariance, 
     β_solver!, ARFF.mse_loss);

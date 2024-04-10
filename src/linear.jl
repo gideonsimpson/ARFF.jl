@@ -27,7 +27,7 @@ Solve the regularized linear system using the normal equations.
 * `y_data` - y coordinates
 * `λ = 1e-8` - Regularization parameter
 """
-function solve_normal!(β::Vector{TY}, S::TS, y_data::Vector{TY}, λ=1e-8) where {TS<:Matrix,TY<:Complex}
+function solve_normal!(β::Vector{TY}, S::TS, y_data::Vector{TY}; λ=1e-8) where {TS<:Matrix,TY<:Complex}
     N = length(y_data)
     
     β .= (S' * S + λ * N * I) \ (S' * y_data)
