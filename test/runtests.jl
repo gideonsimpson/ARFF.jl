@@ -2,6 +2,7 @@ using Test
 using ARFF
 using Random
 using Statistics
+using SpecialFunctions
 
 @testset "Data Sets" begin
     @test include("datasets/data1.jl")
@@ -22,4 +23,9 @@ end
 
 @testset "Utilities" begin
     @test include("utils/utils1.jl")
+end
+
+
+@testset "Training" begin
+    @test include("train/train1.jl")
 end
