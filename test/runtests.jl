@@ -36,5 +36,5 @@ end
 
 
 @testset "Training" begin
-    # @test include("train/train1.jl")
+    @test include("train/train1.jl")
 end

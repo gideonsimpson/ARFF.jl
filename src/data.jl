@@ -111,7 +111,7 @@ Convenience constructor for real valued y data
 function DataSet(x::Vector{TW}, y::Vector{TR}) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
     N = length(x);
     dx = length(x[1]);
-    return ScalarDataSet(x, Complex.(y), N, dx)
+    return ScalarDataSet(x, complex.(y), N, dx)
 end
 
 
@@ -127,6 +127,6 @@ function DataSet(x::Vector{TW}, y::Vector{TB}) where {TR<:AbstractFloat,TW<:Abst
     N = length(x)
     dx = length(x[1])
     dy = length(y[1])
-    return VectorDataSet(x, [Complex.([y_[i] for y_ in y]) for i = 1:dy], N, dx, dy)
+    return VectorDataSet(x, [complex.([y_[i] for y_ in y]) for i = 1:dy], N, dx, dy)
 end
 

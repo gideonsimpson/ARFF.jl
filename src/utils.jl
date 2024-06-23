@@ -33,7 +33,7 @@ Overload evaluation operator so that `F(x)` can be evaluated, where `F`
 corresponds to the Fourier feature model.
 """
 function (F::VectorFourierModel{TC,TR,Vector{TR},Vector{TC}})(x::Vector{TR}) where {TC<:Complex,TR<:AbstractFloat}
-    y = zero(TC, F.dy)
+    y = zeros(TC, F.dy)
     for (β, ω) in F
         y += β * exp(im * (ω ⋅ x))
     end

@@ -111,7 +111,7 @@ function train_rwm!(F::ScalarFourierModel{TC,TR,TW}, data::ScalarDataSet{TC,TR,T
 end
 
 """
-    train_rwm!(F::FourierModel{TB,TR,TW}, batched_data::Vector{DataSet{TB,TR,TW}}, Σ::TM, options::ARFFOptions) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
+    train_rwm!(F::ScalarFourierModel{TC,TR,TW}, batched_data::Vector{ScalarDataSet{TC,TR,TW}}, Σ::TM, options::ARFFOptions; show_progress=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy with batched data, which is cycled through from epoch to epoch.

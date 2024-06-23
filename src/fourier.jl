@@ -103,10 +103,10 @@ end
 
 TBW
 """
-function FourierModel(β::Vector{TC}, ω::Vector{TW}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+function FourierModel(β::Vector{TR}, ω::Vector{TW}) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
     K = length(ω)
     dx = length(ω[1])
-    return ScalarFourierModel(β, ω, K, dx)
+    return ScalarFourierModel(complex.(β), ω, K, dx)
 end
 
 """
@@ -114,9 +114,9 @@ end
 
 TBW
 """
-function FourierModel(β::Vector{TB}, ω::Vector{TW}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC}}
+function FourierModel(β::Vector{TB}, ω::Vector{TW}) where {TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TR}}
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
-    return VectorFourierModel(β, ω, K, dx, dy)
+    return VectorFourierModel([complex.([β_[d_] for β_ in β]) for d_ = 1:dy], ω, K, dx, dy)
 end
