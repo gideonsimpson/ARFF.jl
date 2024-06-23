@@ -43,3 +43,6 @@ data
 
 # output files
 *.jld2
+
+# scratch folder
+scratch/*
