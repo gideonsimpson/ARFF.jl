@@ -13,7 +13,8 @@ include("scalings.jl")
 include("opts.jl")
 include("utils.jl")
 include("linear.jl")
-include("train.jl")
+include("train_scalar.jl")
+include("train_vector.jl")
 include("loss.jl")
 
 export FourierModel, DataSet, ARFFOptions

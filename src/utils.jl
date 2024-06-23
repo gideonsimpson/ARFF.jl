@@ -33,7 +33,7 @@ Overload evaluation operator so that `F(x)` can be evaluated, where `F`
 corresponds to the Fourier feature model.
 """
 function (F::VectorFourierModel{TC,TR,Vector{TR},Vector{TC}})(x::Vector{TR}) where {TC<:Complex,TR<:AbstractFloat}
-    y = zero(TC, F.d)
+    y = zero(TC, F.dy)
     for (β, ω) in F
         y += β * exp(im * (ω ⋅ x))
     end
@@ -42,7 +42,7 @@ function (F::VectorFourierModel{TC,TR,Vector{TR},Vector{TC}})(x::Vector{TR}) whe
 end
 
 """
-    (F::FourierModel{TB,TR,TW})(x::TW, scalings::DataScalings{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    (F::ScalarFourierModel{TB,TR,TW})(x::TW, scalings::ScalarDataScalings{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
 
 Overload evaluation operator so that `F(x)` can be evaluated, where `F`
 corresponds to the Fourier feature model.  This takes in the scalings argument
@@ -61,6 +61,29 @@ function (F::ScalarFourierModel{TB,TR,TW})(x::TW, scalings::ScalarDataScalings{T
     return y
 
 end
+
+
+"""
+    (F::FourierModel{TB,TR,TW})(x::TW, scalings::DataScalings{TB,TR,TW}) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+
+Overload evaluation operator so that `F(x)` can be evaluated, where `F`
+corresponds to the Fourier feature model.  This takes in the scalings argument
+so that x can be in the original units.
+"""
+function (F::VectorFourierModel{TC,TR,AbstractArray{TR},AbstractArray{TC},TI})(x::TW, scalings::VectorDataScalings{TC,TR,AbstractArray{TR},AbstractArray{TC}}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TI<:Integer}
+    y = zero(TC, F.dy)
+    x_scaled = (x - scalings.μx) ./ sqrt.(scalings.σ2x)
+    for (β, ω) in F
+        y += β * exp(im * (ω ⋅ x_scaled))
+    end
+
+    @. y *= sqrt(scalings.σ2y)
+    @. y += scalings.μy
+
+    return y
+
+end
+
 
 """
     fourier_features(x, W)
