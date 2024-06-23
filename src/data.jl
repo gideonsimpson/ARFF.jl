@@ -29,7 +29,7 @@ arrays of y values.
 """
 struct VectorDataSet{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer} <: AbstractDataSet
     x::Vector{TW}
-    y::Vector{TC}
+    y::Vector{TB}
     N::TI
     dx::TI
     dy::TI
@@ -121,7 +121,7 @@ end
 Convenience constructor for real valued y data
 ### Fields
 * `x` - Array of real valued vectors 
-* `y` - Array of real scalars
+* `y` - Array of real valued vectors
 """
 function DataSet(x::Vector{TW}, y::Vector{TB}) where {TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TR}}
     N = length(x)
