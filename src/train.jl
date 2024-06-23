@@ -1,7 +1,7 @@
 
 
 """
-    train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
+    train_rwm!(F::ScalarFourierModel{TC,TR,TW}, data::ScalarDataSet{TC,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy
@@ -14,7 +14,7 @@ strategy
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
+function train_rwm!(F::ScalarFourierModel{TC,TR,TW}, data::ScalarDataSet{TC,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
     # extract values
     K = length(F)
@@ -24,7 +24,7 @@ function train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, Σ::TM, 
     # initialize data structures
     β_proposal = similar(F.β)
     ω_proposal = similar(F.ω)
-    S = zeros(TB, N, K)
+    S = zeros(TC, N, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(d)
@@ -124,7 +124,7 @@ strategy with batched data, which is cycled through from epoch to epoch.
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm!(F::FourierModel{TB,TR,TW}, batched_data::Vector{DataSet{TB,TR,TW}}, Σ::TM, options::ARFFOptions; show_progress=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
+function train_rwm!(F::ScalarFourierModel{TC,TR,TW}, batched_data::Vector{ScalarDataSet{TC,TR,TW}}, Σ::TM, options::ARFFOptions; show_progress=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
     # extract values
     K = length(F)
@@ -135,7 +135,7 @@ function train_rwm!(F::FourierModel{TB,TR,TW}, batched_data::Vector{DataSet{TB,T
     # initialize data structures
     β_proposal = similar(F.β)
     ω_proposal = similar(F.ω)
-    S = zeros(TB, N, K)
+    S = zeros(TC, N, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(d)
@@ -236,7 +236,7 @@ strategy with minibatching, randomly subsampling at each epoch.
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
+function train_rwm!(F::ScalarFourierModel{TC,TR,TW}, data::ScalarDataSet{TC,TR,TW}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
 
     # extract values
     K = length(F)
@@ -246,7 +246,7 @@ function train_rwm!(F::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, batch_si
     # initialize data structures
     β_proposal = similar(F.β)
     ω_proposal = similar(F.ω)
-    S = zeros(TB, batch_size, K)
+    S = zeros(TC, batch_size, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(d)
@@ -351,7 +351,7 @@ strategy. Returns the entire trajectory of models during training.
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm(F₀::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
+function train_rwm(F₀::ScalarFourierModel{TC,TR,TW}, data::ScalarDataSet{TC,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
 
     F = deepcopy(F₀)
@@ -365,7 +365,7 @@ function train_rwm(F₀::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, Σ::TM
     # initialize data structures
     β_proposal = similar(F.β)
     ω_proposal = similar(F.ω)
-    S = zeros(TB, N, K)
+    S = zeros(TC, N, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(d)
@@ -467,7 +467,7 @@ the entire trajectory of models during training.
 * `record_loss=true` - Evaluate the specified loss function at each epoch and
   record
 """
-function train_rwm(F₀::FourierModel{TB,TR,TW}, batched_data::Vector{DataSet{TB,TR,TW}}, Σ::TM, options::ARFFOptions; show_progress=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
+function train_rwm(F₀::ScalarFourierModel{TC,TR,TW}, batched_data::Vector{ScalarDataSet{TC,TR,TW}}, Σ::TM, options::ARFFOptions; show_progress=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
 
     F = deepcopy(F₀)
     F_trajectory = FourierModel{TB,TR,TW}[]
@@ -481,7 +481,7 @@ function train_rwm(F₀::FourierModel{TB,TR,TW}, batched_data::Vector{DataSet{TB
     # initialize data structures
     β_proposal = similar(F.β)
     ω_proposal = similar(F.ω)
-    S = zeros(TB, N, K)
+    S = zeros(TC, N, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(d)
@@ -587,7 +587,7 @@ entire trajectory of models during training.
 * `record_loss=true` - Evaluate the specified loss function at each epoch and
   record
 """
-function train_rwm(F₀::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
+function train_rwm(F₀::ScalarFourierModel{TC,TR,TW}, data::ScalarDataSet{TC,TR,TW}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
 
     F = deepcopy(F₀)
     F_trajectory = FourierModel{TB,TR,TW}[]
@@ -600,7 +600,7 @@ function train_rwm(F₀::FourierModel{TB,TR,TW}, data::DataSet{TB,TR,TW}, batch_
     # initialize data structures
     β_proposal = similar(F.β)
     ω_proposal = similar(F.ω)
-    S = zeros(TB, batch_size, K)
+    S = zeros(TC, batch_size, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(d)
