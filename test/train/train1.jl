@@ -12,8 +12,7 @@ let
     data = DataSet(x, y);
     K = 2^7
     Random.seed!(200) # for reproducibility
-    F0 = FourierModel([1.0 * randn(ComplexF64) for _ in 1:K],
-        [randn(d) for _ in 1:K])
+    F0 = FourierModel([1.0 * randn() for _ in 1:K], [randn(d) for _ in 1:K])
     δ = 10.0 # rwm step size
     λ = 1e-8 # regularization
     n_epochs = 10^3 # number of epochs

@@ -63,8 +63,8 @@ Find the means and variances of the data for scaling
 function get_scalings(data::VectorDataSet{TC,TR,TW,TB,TI}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer}
     μx = mean(data.x)
     σ2x = var(data.x)
-    μy = mean([[y_[i] for y_ in data.y] for i in 1:data.dy])
-    σ2y = var([[y_[i] for y_ in data.y] for i in 1:data.dy])
+    μy = mean(data.y)
+    σ2y = var(data.y)
 
     return VectorDataScalings(μx, σ2x, μy, σ2y)
 end
@@ -99,9 +99,10 @@ function scale_data!(data::VectorDataSet{TC,TR,TW,TB,TI}, scalings::VectorDataSc
 
     for i in 1:data.N
         @. data.x[i] = (data.x[i] - scalings.μx) / sqrt(scalings.σ2x)
+        @. data.y[i] = (data.y[i] - scalings.μy) / sqrt(scalings.σ2y)
     end
     for j in 1:data.dy
-        @. data.y[j]= (data.y[j] - scalings.μy[j]) / sqrt(scalings.σ2y[j])
+        @. data.yt[j]= (data.yt[j] - scalings.μy[j]) / sqrt(scalings.σ2y[j])
     end
 
     data
@@ -138,10 +139,11 @@ function rescale_data!(data::VectorDataSet{TC,TR,TW,TB}, scalings::VectorDataSca
 
     for i in 1:data.N
         @. data.x[i] = scalings.μx + sqrt(scalings.σ2x) * data.x[i]
+        @. data.y[i] = scalings.μy + sqrt(scalings.σ2y) * data.y[i]
     end
 
     for j in 1:data.dy
-        @. data.y[j] = scalings.μy[j] + sqrt(scalings.σ2y[j]) * data.y[j]
+        @. data.yt[j] = scalings.μy[j] + sqrt(scalings.σ2y[j]) * data.yt[j]
     end
 
     data

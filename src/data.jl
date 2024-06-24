@@ -8,6 +8,7 @@ arrays of y values.
 * `x` - Array of real valued vectors 
 * `y` - Array of complex scalars
 * `N` - Number of data points
+* `dx` - Dimension of `x` coordinates
 """
 struct ScalarDataSet{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TI<:Integer} <: AbstractDataSet
     x::Vector{TW}
@@ -24,12 +25,16 @@ Training data containing (x,y) data pairs stored in arrays of x values and
 arrays of y values.
 ### Fields
 * `x` - Array of real valued vectors 
-* `y` - Array of complex scalars
+* `y` - Array of complex valued vectors
+* `yt` - Tranposed array of complex valued vectors
 * `N` - Number of data points
+* `dx` - Dimension of `x` coordinates
+* `dy` - Dimension of `y` coordinates
 """
 struct VectorDataSet{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer} <: AbstractDataSet
     x::Vector{TW}
     y::Vector{TB}
+    yt::Vector{TB}
     N::TI
     dx::TI
     dy::TI
@@ -95,7 +100,7 @@ function Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
     if state > D.N
         return nothing
     end
-    return (D.x[state], [D.y[i][state] for i in 1:D.d]), state + 1
+    return (D.x[state], [D.yt[state]]), state + 1
 end
 
 
@@ -118,7 +123,8 @@ end
 """
     DataSet(x::Vector{TW}, y::Vector{TR}) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
 
-Convenience constructor for real valued y data
+Convenience constructor for real valued y data.  The data is assumed to be
+formatted as `(x[i],y[i])` pairs.
 ### Fields
 * `x` - Array of real valued vectors 
 * `y` - Array of real valued vectors
@@ -127,6 +133,6 @@ function DataSet(x::Vector{TW}, y::Vector{TB}) where {TR<:AbstractFloat,TW<:Abst
     N = length(x)
     dx = length(x[1])
     dy = length(y[1])
-    return VectorDataSet(x, [complex.([y_[i] for y_ in y]) for i = 1:dy], N, dx, dy)
+    return VectorDataSet(x, complex.(y), [complex.([y_[i] for y_ in y]) for i = 1:dy], N, dx, dy)
 end
 

@@ -5,5 +5,5 @@ let
     y = f.(x)
     data = DataSet(x, y)
     scalings = get_scalings(data)
-    scalings.σ2y[2] ≈ 4.5
+    scalings.σ2y[1] ≈ 9.166666666666666
 end

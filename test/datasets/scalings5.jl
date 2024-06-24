@@ -6,6 +6,6 @@ let
     data = DataSet(x, y)
     scalings = get_scalings(data)
     scale_data!(data, scalings)
-    σ2y = var([[y_[i] for y_ in data.y] for i in 1:data.dy]);
+    σ2y = [var(data.yt[i]) for i in 1:data.dy]
     σ2y[1] ≈ 1.
 end

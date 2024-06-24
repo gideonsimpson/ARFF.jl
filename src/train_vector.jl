@@ -40,14 +40,12 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     # fit initial coefficients
     assemble_matrix!(S, data.x, F.ω)
     for d_ in 1:dy
-        options.linear_solve!(F.β[d_], S, data.y[d_], F.ω)
+        options.linear_solve!(F.β[d_], S, data.yt[d_], F.ω)
     end
 
     loss = Float64[]
     p = Progress(options.n_epochs; enabled=show_progress)
 
-    # rearrange data for computing loss function
-    data_y = [[data.y[d_][i] for d_ in 1:dy] for i in 1:N];
     # @show β_proposal;
     # @showprogress "Training..." 
     for i in 1:options.n_epochs
@@ -59,7 +57,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
             assemble_matrix!(S, data.x, ω_proposal)
             for d_ in 1:dy
-                options.linear_solve!(β_proposal[d_], S, data.y[d_], ω_proposal)
+                options.linear_solve!(β_proposal[d_], S, data.yt[d_], ω_proposal)
             end
 
             # apply Metroplis step
@@ -98,13 +96,13 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
         # perform full β update
         assemble_matrix!(S, data.x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, data.y[d_], F.ω)
+            options.linear_solve!(F.β[d_], S, data.yt[d_], F.ω)
         end
 
 
         # record loss
         if record_loss
-            loss_ = options.loss(F, data.x, data_y)
+            loss_ = options.loss(F, data.x, data.y)
             push!(loss, loss_)
         end
 
