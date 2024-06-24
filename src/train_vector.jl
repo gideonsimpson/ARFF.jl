@@ -174,7 +174,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
 
         assemble_matrix!(S, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.y[d_], F.ω)
+            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
 
 
@@ -183,7 +183,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
             assemble_matrix!(S, batched_data[i_batch].x, ω_proposal)
             for d_ in 1:dy
-                options.linear_solve!(β_proposal[d_], S, batched_data[i_batch]data.y[d_], ω_proposal)
+                options.linear_solve!(β_proposal[d_], S, batched_data[i_batch]data.yt[d_], ω_proposal)
             end
 
             # apply Metroplis step
@@ -222,12 +222,12 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
         # perform full β update
         assemble_matrix!(S, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.y[d_], F.ω)
+            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
 
         # record loss
         if record_loss
-            loss_ = options.loss(F, batched_data[i_batch].x, [[batched_data[i_batch].y[d_][i] for d_ in 1:dy] for i in 1:batched_data[i_batch].N])
+            loss_ = options.loss(F, batched_data[i_batch].x, batched_data[i_batch].y)
             push!(loss, loss_)
         end
         
@@ -285,7 +285,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     rows = sample(1:N, batch_size, replace=false)
     assemble_matrix!(S, data.x[rows], F.ω)
     for d_ in 1:dy
-        options.linear_solve!(F.β[d_], S, data.y[d_][rows], F.ω)
+        options.linear_solve!(F.β[d_], S, data.yt[d_][rows], F.ω)
     end
 
     
@@ -303,11 +303,8 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
 
             assemble_matrix!(S, data.x[rows], ω_proposal)
-            options.linear_solve!(β_proposal, S, data.y[rows], ω_proposal)
-
-            assemble_matrix!(S, data.x[rows], ω_proposal)
             for d_ in 1:dy
-                options.linear_solve!(β_proposal[d_], S, data.y[d_][rows], ω_proposal)
+                options.linear_solve!(β_proposal[d_], S, data.yt[d_][rows], ω_proposal)
             end
 
             # apply Metroplis step
@@ -346,12 +343,12 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
         # perform full β update
         assemble_matrix!(S, data.x[rows], F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, data.y[d_][rows], F.ω)
+            options.linear_solve!(F.β[d_], S, data.yt[d_][rows], F.ω)
         end
 
         # record loss
         if record_loss
-            loss_ = options.loss(F, data.x[rows], [[data.y[d_][i] for d_ in 1:dy] for i in rows]);
+            loss_ = options.loss(F, data.x[rows], data.y[rows]);
             push!(loss, loss_)
         end
 
@@ -412,14 +409,12 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     # fit initial coefficients
     assemble_matrix!(S, data.x, F.ω)
     for d_ in 1:dy
-        options.linear_solve!(F.β[d_], S, data.y[d_], F.ω)
+        options.linear_solve!(F.β[d_], S, data.yt[d_], F.ω)
     end
 
     loss = Float64[]
     p = Progress(options.n_epochs; enabled=show_progress)
 
-    # rearrange data for computing loss function
-    data_y = [[data.y[d_][i] for d_ in 1:dy] for i in 1:N]
     # @show β_proposal;
     # @showprogress "Training..." 
     for i in 1:options.n_epochs
@@ -431,7 +426,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
             assemble_matrix!(S, data.x, ω_proposal)
             for d_ in 1:dy
-                options.linear_solve!(β_proposal[d_], S, data.y[d_], ω_proposal)
+                options.linear_solve!(β_proposal[d_], S, data.yt[d_], ω_proposal)
             end
 
             # apply Metroplis step
@@ -470,7 +465,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
         # perform full β update
         assemble_matrix!(S, data.x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, data.y[d_], F.ω)
+            options.linear_solve!(F.β[d_], S, data.yt[d_], F.ω)
         end
 
         # record F_trajectory
@@ -479,7 +474,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
 
         # record loss
         if record_loss
-            loss_ = options.loss(F, data.x, data_y)
+            loss_ = options.loss(F, data.x, data.y)
             push!(loss, loss_)
         end
 
@@ -555,7 +550,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
 
         assemble_matrix!(S, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.y[d_], F.ω)
+            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
 
 
@@ -564,7 +559,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
             assemble_matrix!(S, batched_data[i_batch].x, ω_proposal)
             for d_ in 1:dy
-                options.linear_solve!(β_proposal[d_], S, batched_data[i_batch]data.y[d_], ω_proposal)
+                options.linear_solve!(β_proposal[d_], S, batched_data[i_batch]data.yt[d_], ω_proposal)
             end
 
             # apply Metroplis step
@@ -603,7 +598,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
         # perform full β update
         assemble_matrix!(S, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.y[d_], F.ω)
+            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
         # record F_trajectory
         push!(F_trajectory, deepcopy(F))
@@ -611,7 +606,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
 
         # record loss
         if record_loss
-            loss_ = options.loss(F, batched_data[i_batch].x, [[batched_data[i_batch].y[d_][i] for d_ in 1:dy] for i in 1:batched_data[i_batch].N])
+            loss_ = options.loss(F, batched_data[i_batch].x, batched_data[i_batch].y)
             push!(loss, loss_)
         end
 
@@ -674,7 +669,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     rows = sample(1:N, batch_size, replace=false)
     assemble_matrix!(S, data.x[rows], F.ω)
     for d_ in 1:dy
-        options.linear_solve!(F.β[d_], S, data.y[d_][rows], F.ω)
+        options.linear_solve!(F.β[d_], S, data.yt[d_][rows], F.ω)
     end
 
 
@@ -692,11 +687,8 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
 
             assemble_matrix!(S, data.x[rows], ω_proposal)
-            options.linear_solve!(β_proposal, S, data.y[rows], ω_proposal)
-
-            assemble_matrix!(S, data.x[rows], ω_proposal)
             for d_ in 1:dy
-                options.linear_solve!(β_proposal[d_], S, data.y[d_][rows], ω_proposal)
+                options.linear_solve!(β_proposal[d_], S, data.yt[d_][rows], ω_proposal)
             end
 
             # apply Metroplis step
@@ -735,14 +727,14 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
         # perform full β update
         assemble_matrix!(S, data.x[rows], F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, data.y[d_][rows], F.ω)
+            options.linear_solve!(F.β[d_], S, data.yt[d_][rows], F.ω)
         end
         # record F_trajectory
         push!(F_trajectory, deepcopy(F))
 
         # record loss
         if record_loss
-            loss_ = options.loss(F, data.x[rows], [[data.y[d_][i] for d_ in 1:dy] for i in rows])
+            loss_ = options.loss(F, data.x[rows], data.y[rows])
             push!(loss, loss_)
         end
 
