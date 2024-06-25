@@ -22,6 +22,7 @@ end
 Structure containing a scalar valued fourier model which will be learned
 ### Fields
 * `β` - Array of complex coefficients
+* `βt` - Transposed array of complex coefficients
 * `ω` - Array of wave vectors
 * `K` - Number of Fourier features
 * `dx` - Dimension of `x` coordinate
@@ -29,6 +30,7 @@ Structure containing a scalar valued fourier model which will be learned
 """
 struct VectorFourierModel{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer} <: AbstractFourierModel
     β::Vector{TB}
+    βt::Vector{TB}
     ω::Vector{TW}
     K::TI
     dx::TI
@@ -95,7 +97,7 @@ function Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
     if state > F.K
         return nothing
     end
-    return ([F.β[i][state] for i in 1:F.dy], F.ω[state]), state + 1
+    return (F.β[state], F.ω[state]), state + 1
 end
 
 """
@@ -118,5 +120,33 @@ function FourierModel(β::Vector{TB}, ω::Vector{TW}) where {TR<:AbstractFloat,T
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
-    return VectorFourierModel([complex.([β_[d_] for β_ in β]) for d_ = 1:dy], ω, K, dx, dy)
+    return VectorFourierModel(complex.(β), [complex.([β_[d_] for β_ in β]) for d_ = 1:dy], ω, K, dx, dy)
+end
+
+"""
+    copy_from_transpose!(F::VectorFourierModel)
+
+TBW
+"""
+function copy_from_transpose!(F::VectorFourierModel)
+    for d_ in 1:F.dy
+        for k in 1:F.K
+            F.β[k][d_] = F.βt[d_][k]
+        end
+    end
+    F
+end
+
+"""
+    copy_to_transpose!(F::VectorFourierModel)
+
+TBW
+"""
+function copy_to_transpose!(F::VectorFourierModel)
+    for d_ in 1:F.dy
+        for k in 1:F.K
+            F.βt[d_][k] = F.β[k][d_]
+        end
+    end
+    F
 end

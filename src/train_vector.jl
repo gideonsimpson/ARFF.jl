@@ -20,7 +20,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     (N,dx,dy) = size(data);
 
     # initialize data structures
-    β_proposal = deepcopy(F.β)
+    β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
     S = zeros(TC, N, K)
 
@@ -40,7 +40,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     # fit initial coefficients
     assemble_matrix!(S, data.x, F.ω)
     for d_ in 1:dy
-        options.linear_solve!(F.β[d_], S, data.yt[d_], F.ω)
+        options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
     end
 
     loss = Float64[]
@@ -63,10 +63,10 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
             # apply Metroplis step
             for k in 1:K
                 ζ = rand()
-                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.β[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.βt[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
                     @. F.ω[k] = ω_proposal[k]
                     for d_ in 1:dy
-                        F.β[d_][k] = β_proposal[d_][k];
+                        F.βt[d_][k] = β_proposal[d_][k];
                     end
                     accept_ += 1.0 / (K * options.n_ω_steps)
                 end
@@ -96,10 +96,10 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
         # perform full β update
         assemble_matrix!(S, data.x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, data.yt[d_], F.ω)
+            options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
         end
 
-
+        copy_from_transpose!(F)
         # record loss
         if record_loss
             loss_ = options.loss(F, data.x, data.y)
@@ -141,7 +141,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
     n_batch = length(batched_data)
 
     # initialize data structures
-    β_proposal = deepcopy(F.β)
+    β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
     S = zeros(TC, N, K)
 
@@ -174,7 +174,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
 
         assemble_matrix!(S, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
+            options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
 
 
@@ -189,10 +189,10 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
             # apply Metroplis step
             for k in 1:K
                 ζ = rand()
-                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.β[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.βt[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
                     @. F.ω[k] = ω_proposal[k]
                     for d_ in 1:dy
-                        F.β[d_][k] = β_proposal[d_][k]
+                        F.βt[d_][k] = β_proposal[d_][k]
                     end
                     accept_ += 1.0 / (K * options.n_ω_steps)
                 end
@@ -222,8 +222,10 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
         # perform full β update
         assemble_matrix!(S, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
+            options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
+
+        copy_from_transpose!(F);
 
         # record loss
         if record_loss
@@ -264,7 +266,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     (N, dx, dy) = size(data);
 
     # initialize data structures
-    β_proposal = deepcopy(F.β)
+    β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
     S = zeros(TC, batch_size, K)
 
@@ -285,7 +287,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     rows = sample(1:N, batch_size, replace=false)
     assemble_matrix!(S, data.x[rows], F.ω)
     for d_ in 1:dy
-        options.linear_solve!(F.β[d_], S, data.yt[d_][rows], F.ω)
+        options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
     end
 
     
@@ -310,10 +312,10 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
             # apply Metroplis step
             for k in 1:K
                 ζ = rand()
-                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.β[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.βt[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
                     @. F.ω[k] = ω_proposal[k]
                     for d_ in 1:dy
-                        F.β[d_][k] = β_proposal[d_][k]
+                        F.βt[d_][k] = β_proposal[d_][k]
                     end
                     accept_ += 1.0 / (K * options.n_ω_steps)
                 end
@@ -343,9 +345,9 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
         # perform full β update
         assemble_matrix!(S, data.x[rows], F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, data.yt[d_][rows], F.ω)
+            options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
         end
-
+        copy_from_transpose!(F)
         # record loss
         if record_loss
             loss_ = options.loss(F, data.x[rows], data.y[rows]);
@@ -389,7 +391,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     (N, dx, dy) = size(data)
 
     # initialize data structures
-    β_proposal = deepcopy(F.β)
+    β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
     S = zeros(TC, N, K)
 
@@ -409,7 +411,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     # fit initial coefficients
     assemble_matrix!(S, data.x, F.ω)
     for d_ in 1:dy
-        options.linear_solve!(F.β[d_], S, data.yt[d_], F.ω)
+        options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
     end
 
     loss = Float64[]
@@ -432,10 +434,10 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
             # apply Metroplis step
             for k in 1:K
                 ζ = rand()
-                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.β[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.βt[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
                     @. F.ω[k] = ω_proposal[k]
                     for d_ in 1:dy
-                        F.β[d_][k] = β_proposal[d_][k]
+                        F.βt[d_][k] = β_proposal[d_][k]
                     end
                     accept_ += 1.0 / (K * options.n_ω_steps)
                 end
@@ -465,12 +467,11 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
         # perform full β update
         assemble_matrix!(S, data.x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, data.yt[d_], F.ω)
+            options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
         end
-
+        copy_from_transpose!(F)
         # record F_trajectory
         push!(F_trajectory, deepcopy(F))
-
 
         # record loss
         if record_loss
@@ -517,7 +518,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
     n_batch = length(batched_data)
 
     # initialize data structures
-    β_proposal = deepcopy(F.β)
+    β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
     S = zeros(TC, N, K)
 
@@ -550,7 +551,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
 
         assemble_matrix!(S, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
+            options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
 
 
@@ -565,10 +566,10 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
             # apply Metroplis step
             for k in 1:K
                 ζ = rand()
-                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.β[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.βt[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
                     @. F.ω[k] = ω_proposal[k]
                     for d_ in 1:dy
-                        F.β[d_][k] = β_proposal[d_][k]
+                        F.βt[d_][k] = β_proposal[d_][k]
                     end
                     accept_ += 1.0 / (K * options.n_ω_steps)
                 end
@@ -598,8 +599,9 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
         # perform full β update
         assemble_matrix!(S, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
+            options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
+        copy_from_transpose!(F)
         # record F_trajectory
         push!(F_trajectory, deepcopy(F))
 
@@ -648,7 +650,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     (N, dx, dy) = size(data)
 
     # initialize data structures
-    β_proposal = deepcopy(F.β)
+    β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
     S = zeros(TC, batch_size, K)
 
@@ -669,7 +671,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     rows = sample(1:N, batch_size, replace=false)
     assemble_matrix!(S, data.x[rows], F.ω)
     for d_ in 1:dy
-        options.linear_solve!(F.β[d_], S, data.yt[d_][rows], F.ω)
+        options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
     end
 
 
@@ -694,10 +696,10 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
             # apply Metroplis step
             for k in 1:K
                 ζ = rand()
-                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.β[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.βt[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
                     @. F.ω[k] = ω_proposal[k]
                     for d_ in 1:dy
-                        F.β[d_][k] = β_proposal[d_][k]
+                        F.βt[d_][k] = β_proposal[d_][k]
                     end
                     accept_ += 1.0 / (K * options.n_ω_steps)
                 end
@@ -727,8 +729,9 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
         # perform full β update
         assemble_matrix!(S, data.x[rows], F.ω)
         for d_ in 1:dy
-            options.linear_solve!(F.β[d_], S, data.yt[d_][rows], F.ω)
+            options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
         end
+        copy_from_transpose!(F)
         # record F_trajectory
         push!(F_trajectory, deepcopy(F))
 
