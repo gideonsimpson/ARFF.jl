@@ -2,6 +2,7 @@ using Test
 using ARFF
 using Random
 using Statistics
+using LinearAlgebra
 using SpecialFunctions
 
 @testset "Scalar Data Sets" begin
@@ -37,4 +38,5 @@ end
 
 @testset "Training" begin
     @test include("train/train1.jl")
+    @test include("train/train2.jl")
 end
