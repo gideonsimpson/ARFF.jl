@@ -25,6 +25,21 @@ function (F::ScalarFourierModel{TC,TR,TW})(x::TW) where {TC<:Complex,TR<:Abstrac
 
 end
 
+"""
+    (F::ScalarFourierModel{TB,TR,TW})(x::TW) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+
+Overload evaluation operator so that `F(x)` can be evaluated, where `F`
+corresponds to the Fourier feature model.
+"""
+function (F::ScalarFeatureModel{TC,TR,TW,TI,TF})(x::TW) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TI<:Integer,TF<:Function}
+    y = zero(TC)
+    for (β, ω) in F
+        y += β * F.ϕ(ω, x)
+    end
+    return y
+
+end
+
 
 """
     (F::VectorFourierModel{TC,TR,Vector{TR},Vector{TC}})(x::Vector{TR}) where {TC<:Complex,TR<:AbstractFloat}
@@ -36,6 +51,21 @@ function (F::VectorFourierModel{TC,TR,Vector{TR},Vector{TC}})(x::Vector{TR}) whe
     y = zeros(TC, F.dy)
     for (β, ω) in F
         y += β * exp(im * (ω ⋅ x))
+    end
+    return y
+
+end
+
+"""
+    (F::VectorFeatureModel{TC,TR,Vector{TR},Vector{TC}})(x::Vector{TR}) where {TC<:Complex,TR<:AbstractFloat}
+
+Overload evaluation operator so that `F(x)` can be evaluated, where `F`
+corresponds to the Fourier feature model.
+"""
+function (F::VectorFeatureModel{TC,TR,Vector{TR},Vector{TC},TI,TF})(x::Vector{TR}) where {TC<:Complex,TR<:AbstractFloat, TI<:Integer, TF<:Function}
+    y = zeros(TC, F.dy)
+    for (β, ω) in F
+        y += β * F.ϕ(ω, x)
     end
     return y
 

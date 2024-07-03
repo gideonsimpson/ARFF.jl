@@ -16,6 +16,23 @@ function assemble_matrix!(S::TS, x_data::Vector{TX}, ω_vals::Vector{TX}) where 
     S
 end
 
+"""
+    assemble_matrix!(S::TS, features::Function x_data::Vector{TX}, ω_vals::Vector{TX}) where {TS<:Matrix,TF<:AbstractFloat,TX<:AbstractArray{TF}}
+
+Assemble the design matrix using the current ω values and x measurement positions with defined features function.
+"""
+function assemble_matrix!(S::TS, features::Function, x_data::Vector{TX}, ω_vals::Vector{TX}) where {TS<:Matrix,TF<:AbstractFloat,TX<:AbstractArray{TF}}
+    N = length(x_data)
+    K = length(ω_vals)
+
+    Threads.@threads for k in 1:K
+        for n in 1:N
+            S[n, k] = features(ω_vals[k],x_data[n])
+        end
+    end
+    S
+end
+
 
 """
     solve_normal!(β, S, y_data; λ = 1e-8)

@@ -16,6 +16,7 @@ include("linear.jl")
 include("train_scalar.jl")
 include("train_vector.jl")
 include("loss.jl")
+include("features.jl")
 
 export FourierModel, DataSet, ARFFOptions
 export train_rwm, train_rwm!
