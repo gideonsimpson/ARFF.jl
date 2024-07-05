@@ -1,6 +1,7 @@
 
 """
-    train_rwm!(F::VectorFourierModel{TC,TR,TW,TI}, data::ScalarDataSet{TC,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
+    train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI}, 
+    Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy
@@ -13,7 +14,8 @@ strategy
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{TC,TR,TW,TB,TI}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC}, TI<:Integer, TM<:AbstractMatrix}
+function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI}, 
+    Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     # extract values
     K = length(F)
@@ -22,7 +24,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     # initialize data structures
     β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
-    S = zeros(TC, N, K)
+    S = zeros(TB, N, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(dx)
@@ -35,138 +37,17 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     # initialize RWM distribution
     mv_normal = MvNormal(Σ_mean)
 
-    # track acceptance rate and loss over
-    acceptance_rate = Float64[]
-    # fit initial coefficients
-    assemble_matrix!(S, data.x, F.ω)
-    for d_ in 1:dy
-        options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
-    end
-
-    loss = Float64[]
-    p = Progress(options.n_epochs; enabled=show_progress)
-
-    # @show β_proposal;
-    # @showprogress "Training..." 
-    for i in 1:options.n_epochs
-
-        accept_ = 0.0
-        loss_ = 0.0
-        for j in 1:options.n_ω_steps
-            # generate proposal
-            @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
-            assemble_matrix!(S, data.x, ω_proposal)
-            for d_ in 1:dy
-                options.linear_solve!(β_proposal[d_], S, data.yt[d_], ω_proposal)
-            end
-
-            # apply Metroplis step
-            for k in 1:K
-                ζ = rand()
-                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.βt[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
-                    @. F.ω[k] = ω_proposal[k]
-                    for d_ in 1:dy
-                        F.βt[d_][k] = β_proposal[d_][k];
-                    end
-                    accept_ += 1.0 / (K * options.n_ω_steps)
-                end
-            end
-
-
-            # update running mean and covariance
-            if (options.adapt_covariance)
-                # compute instantaneous ensemble averages
-                ω_mean_ .= mean(F.ω)
-                Σ_mean_ .= cov(F.ω, corrected=false)
-                # update cumulative averages 
-                l = (i - 1) * options.n_ω_steps + j
-                @. Σ_mean *= (l - 1) / l
-                @. Σ_mean += 1 / l * Σ_mean_ + (l - 1) / l^2 * (ω_mean_ - ω_mean) * (ω_mean_ - ω_mean)'
-                # ensure symmetry
-                @. Σ_mean = 0.5 * (Σ_mean + Σ_mean')
-
-                @. ω_mean += (ω_mean_ - ω_mean) / l
-                # switch to dynamic covariance matrix ater i n_burn epochs
-                if (i > options.n_burn)
-                    @set mv_normal = MvNormal(Σ_mean)
-                end
-            end
-        end
-
-        # perform full β update
-        assemble_matrix!(S, data.x, F.ω)
-        for d_ in 1:dy
-            options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
-        end
-
-        copy_from_transpose!(F)
-        # record loss
-        if record_loss
-            loss_ = options.loss(F, data.x, data.y)
-            push!(loss, loss_)
-        end
-
-        # record acceptance rate
-        if (i > 1)
-            push!(acceptance_rate, acceptance_rate[end] + (accept_ - acceptance_rate[end]) / i)
-        else
-            push!(acceptance_rate, accept_)
-        end
-        next!(p; showvalues=[(:loss, loss_), (:accept, accept_)])
-    end
-
-    return Σ_mean, acceptance_rate, loss
-end
-
-"""
-    train_rwm!(F::VectorFeatureModel{TC,TR,TW}, data::ScalarDataSet{TC,TR,TW}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix}
-
-Train the feature model using a random walk Metropolis exploration
-strategy
-
-### Fields
-* `F` - The `VectorFeatureModel` to be trained
-* `data`- The `DataSet` training data
-* `Σ` - Initial covariance matrix for RWM proposals
-* `options` - `ARFFOptions` structure specifcying the number epochs, proposal step size, etc.
-* `show_progress=true` - Display training progress using `ProgressMeter`
-* `record_loss=true` - Evaluate the specified loss function at each epoch and record
-"""
-function train_rwm!(F::VectorFeatureModel{TC,TR,TW,TB,TI,TF}, data::VectorDataSet{TC,TR,TW,TB,TI}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC}, TI<:Integer, TM<:AbstractMatrix, TF<:Function}
-
-    # extract values
-    K = length(F)
-    (N,dx,dy) = size(data);
-
-    # initialize data structures
-    β_proposal = deepcopy(F.βt)
-    ω_proposal = deepcopy(F.ω)
-    S = zeros(TC, N, K)
-
-    # instantaneous ensemble averages
-    ω_mean_ = zeros(dx)
-    Σ_mean_ = zeros(dx, dx)
-
-    # cumulative averages 
-    ω_mean = zeros(dx)
-    Σ_mean = deepcopy(Σ)
-
-    # initialize RWM distribution
-    mv_normal = MvNormal(Σ_mean)
-
-    # track acceptance rate and loss over
-    acceptance_rate = Float64[]
     # fit initial coefficients
     assemble_matrix!(S, F.ϕ, data.x, F.ω)
     for d_ in 1:dy
         options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
     end
 
+    # track acceptance rate and loss over
+    acceptance_rate = Float64[]
     loss = Float64[]
     p = Progress(options.n_epochs; enabled=show_progress)
-
-    # @show β_proposal;
-    # @showprogress "Training..." 
+    
     for i in 1:options.n_epochs
 
         accept_ = 0.0
@@ -238,8 +119,10 @@ function train_rwm!(F::VectorFeatureModel{TC,TR,TW,TB,TI,TF}, data::VectorDataSe
 end
 
 
+
 """
-    train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{VectorDataSet{TC,TR,TW,TB,TI}}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer,TM<:AbstractMatrix}
+    train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, batched_data::Vector{VectorDataSet{TR,TB,TI}},
+    Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy
@@ -252,7 +135,8 @@ strategy
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{VectorDataSet{TC,TR,TW,TB,TI}}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer,TM<:AbstractMatrix}
+function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, batched_data::Vector{VectorDataSet{TR,TB,TI}},
+    Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     # extract values
     K = length(F)
@@ -262,7 +146,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
     # initialize data structures
     β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
-    S = zeros(TC, N, K)
+    S = zeros(TB, N, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(dx)
@@ -275,32 +159,32 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
     # initialize RWM distribution
     mv_normal = MvNormal(Σ_mean)
 
+    i_batch = 1
+    # fit initial coefficients at each epoch
+    assemble_matrix!(S, F.ϕ, batched_data[i_batch].x, F.ω)
+    for d_ in 1:dy
+        options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
+    end
+
     # track acceptance rate and loss over
     acceptance_rate = Float64[]
     loss = Float64[]
     
     p = Progress(options.n_epochs; enabled=show_progress)
 
+
     # rearrange data for computing loss function
-    # @show β_proposal;
-    # @showprogress "Training..." 
     for i in 1:options.n_epochs
 
         i_batch = mod1(i, n_batch); # current data set index
         accept_ = 0.0
         loss_ = 0.0
-        # fit initial coefficients at each epoch
-
-        assemble_matrix!(S, batched_data[i_batch].x, F.ω)
-        for d_ in 1:dy
-            options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
-        end
 
 
         for j in 1:options.n_ω_steps
             # generate proposal
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
-            assemble_matrix!(S, batched_data[i_batch].x, ω_proposal)
+            assemble_matrix!(S, F.ϕ, batched_data[i_batch].x, ω_proposal)
             for d_ in 1:dy
                 options.linear_solve!(β_proposal[d_], S, batched_data[i_batch]data.yt[d_], ω_proposal)
             end
@@ -339,7 +223,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
         end
 
         # perform full β update
-        assemble_matrix!(S, batched_data[i_batch].x, F.ω)
+        assemble_matrix!(S, F.ϕ, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
             options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
@@ -366,7 +250,8 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{
 end
 
 """
-    train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{TC,TR,TW,TB,TI}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
+    train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI}, 
+    batch_size::TI, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy with minibatching, randomly subsampling at each epoch.
@@ -378,7 +263,8 @@ strategy with minibatching, randomly subsampling at each epoch.
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{TC,TR,TW,TB,TI}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC}, TM<:AbstractMatrix,TI<:Integer}
+function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI}, 
+    batch_size::TI, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     # extract values
     K = length(F)
@@ -387,7 +273,7 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     # initialize data structures
     β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
-    S = zeros(TC, batch_size, K)
+    S = zeros(TB, batch_size, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(dx)
@@ -400,129 +286,6 @@ function train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{T
     # initialize RWM distribution
     mv_normal = MvNormal(Σ_mean)
 
-    # track acceptance rate and loss over
-    acceptance_rate = Float64[]
-    # fit initial coefficients
-    rows = sample(1:N, batch_size, replace=false)
-    assemble_matrix!(S, data.x[rows], F.ω)
-    for d_ in 1:dy
-        options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
-    end
-
-    
-    loss = Float64[]
-    p = Progress(options.n_epochs; enabled=show_progress)
-
-    # @showprogress "Training..." 
-    for i in 1:options.n_epochs
-
-        accept_ = 0.0
-        loss_ = 0.0
-        rows = sample(1:N, batch_size, replace=false)
-        for j in 1:options.n_ω_steps
-            # generate proposal
-            @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
-
-            assemble_matrix!(S, data.x[rows], ω_proposal)
-            for d_ in 1:dy
-                options.linear_solve!(β_proposal[d_], S, data.yt[d_][rows], ω_proposal)
-            end
-
-            # apply Metroplis step
-            for k in 1:K
-                ζ = rand()
-                if ((norm([β_proposal[d_][k] for d_ in 1:dy]) / norm([F.βt[d_][k] for d_ in 1:dy]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
-                    @. F.ω[k] = ω_proposal[k]
-                    for d_ in 1:dy
-                        F.βt[d_][k] = β_proposal[d_][k]
-                    end
-                    accept_ += 1.0 / (K * options.n_ω_steps)
-                end
-            end
-
-
-            # update running mean and covariance
-            if (options.adapt_covariance)
-                # compute instantaneous ensemble averages
-                ω_mean_ .= mean(F.ω)
-                Σ_mean_ .= cov(F.ω, corrected=false)
-                # update cumulative averages 
-                l = (i - 1) * options.n_ω_steps + j
-                @. Σ_mean *= (l - 1) / l
-                @. Σ_mean += 1 / l * Σ_mean_ + (l - 1) / l^2 * (ω_mean_ - ω_mean) * (ω_mean_ - ω_mean)'
-                # ensure symmetry
-                @. Σ_mean = 0.5 * (Σ_mean + Σ_mean')
-
-                @. ω_mean += (ω_mean_ - ω_mean) / l
-                # switch to dynamic covariance matrix ater i n_burn epochs
-                if (i > options.n_burn)
-                    @set mv_normal = MvNormal(Σ_mean)
-                end
-            end
-        end
-
-        # perform full β update
-        assemble_matrix!(S, data.x[rows], F.ω)
-        for d_ in 1:dy
-            options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
-        end
-        copy_from_transpose!(F)
-        # record loss
-        if record_loss
-            loss_ = options.loss(F, data.x[rows], data.y[rows]);
-            push!(loss, loss_)
-        end
-
-        # record acceptance rate
-        if (i > 1)
-            push!(acceptance_rate, acceptance_rate[end] + (accept_ - acceptance_rate[end]) / i)
-        else
-            push!(acceptance_rate, accept_)
-        end
-        next!(p; showvalues=[(:loss, loss_), (:accept, accept_)])
-    end
-
-    return Σ_mean, acceptance_rate, loss
-end
-####
-
-"""
-    train_rwm!(F::VectorFeaturerModel{TC,TR,TW,TB,TI}, data::VectorDataSet{TC,TR,TW,TB,TI}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
-
-Train the Fourier feature model using a random walk Metropolis exploration
-strategy with minibatching, randomly subsampling at each epoch.
-
-* `F` - The `VectorFeatureModel` to be trained
-* `batch_size`- Minibatch size
-* `Σ` - Initial covariance matrix for RWM proposals
-* `options` - `ARFFOptions` structure specifcying the number epochs, proposal step size, etc.
-* `show_progress=true` - Display training progress using `ProgressMeter`
-* `record_loss=true` - Evaluate the specified loss function at each epoch and record
-"""
-function train_rwm!(F::VectorFeatureModel{TC,TR,TW,TB,TI,TF}, data::VectorDataSet{TC,TR,TW,TB,TI}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC}, TM<:AbstractMatrix,TI<:Integer,TF<:Function}
-
-    # extract values
-    K = length(F)
-    (N, dx, dy) = size(data);
-
-    # initialize data structures
-    β_proposal = deepcopy(F.βt)
-    ω_proposal = deepcopy(F.ω)
-    S = zeros(TC, batch_size, K)
-
-    # instantaneous ensemble averages
-    ω_mean_ = zeros(dx)
-    Σ_mean_ = zeros(dx, dx)
-
-    # cumulative averages 
-    ω_mean = zeros(dx)
-    Σ_mean = deepcopy(Σ)
-
-    # initialize RWM distribution
-    mv_normal = MvNormal(Σ_mean)
-
-    # track acceptance rate and loss over
-    acceptance_rate = Float64[]
     # fit initial coefficients
     rows = sample(1:N, batch_size, replace=false)
     assemble_matrix!(S, F.ϕ, data.x[rows], F.ω)
@@ -530,7 +293,8 @@ function train_rwm!(F::VectorFeatureModel{TC,TR,TW,TB,TI,TF}, data::VectorDataSe
         options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
     end
 
-    
+    # track acceptance rate and loss over
+    acceptance_rate = Float64[]
     loss = Float64[]
     p = Progress(options.n_epochs; enabled=show_progress)
 
@@ -605,10 +369,11 @@ function train_rwm!(F::VectorFeatureModel{TC,TR,TW,TB,TI,TF}, data::VectorDataSe
 
     return Σ_mean, acceptance_rate, loss
 end
-####
+
 
 """
-    train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{TC,TR,TW,TB,TI}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer,TM<:AbstractMatrix}
+    train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI},
+    Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy
@@ -621,10 +386,11 @@ strategy
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{TC,TR,TW,TB,TI}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer,TM<:AbstractMatrix}
+function train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI},
+    Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     F = deepcopy(F₀)
-    F_trajectory = FourierModel{TC,TR,TW, TB,TI}[];
+    F_trajectory = typeof(F)[];
 
     # extract values
     K = length(F)
@@ -633,7 +399,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     # initialize data structures
     β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
-    S = zeros(TC, N, K)
+    S = zeros(TB, N, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(dx)
@@ -646,19 +412,17 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     # initialize RWM distribution
     mv_normal = MvNormal(Σ_mean)
 
-    # track acceptance rate and loss over
-    acceptance_rate = Float64[]
     # fit initial coefficients
-    assemble_matrix!(S, data.x, F.ω)
+    assemble_matrix!(S, F.ϕ, data.x, F.ω)
     for d_ in 1:dy
         options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
     end
 
+    # track acceptance rate and loss over
+    acceptance_rate = Float64[]
     loss = Float64[]
     p = Progress(options.n_epochs; enabled=show_progress)
 
-    # @show β_proposal;
-    # @showprogress "Training..." 
     for i in 1:options.n_epochs
 
         accept_ = 0.0
@@ -666,7 +430,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
         for j in 1:options.n_ω_steps
             # generate proposal
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
-            assemble_matrix!(S, data.x, ω_proposal)
+            assemble_matrix!(S, F.ϕ, data.x, ω_proposal)
             for d_ in 1:dy
                 options.linear_solve!(β_proposal[d_], S, data.yt[d_], ω_proposal)
             end
@@ -705,7 +469,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
         end
 
         # perform full β update
-        assemble_matrix!(S, data.x, F.ω)
+        assemble_matrix!(S, F.ϕ, data.x, F.ω)
         for d_ in 1:dy
             options.linear_solve!(F.βt[d_], S, data.yt[d_], F.ω)
         end
@@ -733,7 +497,8 @@ end
 
 
 """
-    train_rwm!(F::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{VectorDataSet{TC,TR,TW,TB,TI}}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer,TM<:AbstractMatrix}
+    train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, batched_data::Vector{VectorDataSet{TR,TB,TI}},
+    Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy
@@ -746,11 +511,11 @@ strategy
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
-function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vector{VectorDataSet{TC,TR,TW,TB,TI}}, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer,TM<:AbstractMatrix}
+function train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, batched_data::Vector{VectorDataSet{TR,TB,TI}},
+    Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     F = deepcopy(F₀)
-    F_trajectory = FourierModel{TC,TR,TW,TB,TI}[];
-
+    F_trajectory = typeof(F)[];
 
     # extract values
     K = length(F)
@@ -760,7 +525,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
     # initialize data structures
     β_proposal = deepcopy(F.βt)
     ω_proposal = deepcopy(F.ω)
-    S = zeros(TC, N, K)
+    S = zeros(TB, N, K)
 
     # instantaneous ensemble averages
     ω_mean_ = zeros(dx)
@@ -773,6 +538,13 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
     # initialize RWM distribution
     mv_normal = MvNormal(Σ_mean)
 
+    i_batch = 1
+    # fit initial coefficients at each epoch
+    assemble_matrix!(S, F.ϕ, batched_data[i_batch].x, F.ω)
+    for d_ in 1:dy
+        options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
+    end
+
     # track acceptance rate and loss over
     acceptance_rate = Float64[]
     loss = Float64[]
@@ -780,8 +552,6 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
     p = Progress(options.n_epochs; enabled=show_progress)
 
     # rearrange data for computing loss function
-    # @show β_proposal;
-    # @showprogress "Training..." 
     for i in 1:options.n_epochs
 
         i_batch = mod1(i, n_batch) # current data set index
@@ -789,16 +559,10 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
         loss_ = 0.0
         # fit initial coefficients at each epoch
 
-        assemble_matrix!(S, batched_data[i_batch].x, F.ω)
-        for d_ in 1:dy
-            options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
-        end
-
-
         for j in 1:options.n_ω_steps
             # generate proposal
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
-            assemble_matrix!(S, batched_data[i_batch].x, ω_proposal)
+            assemble_matrix!(S, F.ϕ, batched_data[i_batch].x, ω_proposal)
             for d_ in 1:dy
                 options.linear_solve!(β_proposal[d_], S, batched_data[i_batch]data.yt[d_], ω_proposal)
             end
@@ -837,7 +601,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
         end
 
         # perform full β update
-        assemble_matrix!(S, batched_data[i_batch].x, F.ω)
+        assemble_matrix!(S, F.ϕ, batched_data[i_batch].x, F.ω)
         for d_ in 1:dy
             options.linear_solve!(F.βt[d_], S, batched_data[i_batch]data.yt[d_], F.ω)
         end
@@ -866,7 +630,8 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, batched_data::Vecto
 end
 
 """
-    train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{TC,TR,TW,TB,TI}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TM<:AbstractMatrix,TI<:Integer}
+    train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI},
+    batch_size::TI, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy with minibatching, randomly subsampling at each epoch.
@@ -880,10 +645,11 @@ strategy with minibatching, randomly subsampling at each epoch.
 * `record_loss=true` - Evaluate the specified loss function at each epoch and
   record
 """
-function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet{TC,TR,TW,TB,TI}, batch_size::TI, Σ::TM, options::ARFFOptions; show_progress=true, record_loss=true) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC}, TM<:AbstractMatrix,TI<:Integer}
+function train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI},
+    batch_size::TI, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     F = deepcopy(F₀)
-    F_trajectory = FourierModel{TC,TR,TW,TB,TI}[]
+    F_trajectory = typeof(F)[]
     
     # extract values
     K = length(F)
@@ -905,16 +671,16 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
     # initialize RWM distribution
     mv_normal = MvNormal(Σ_mean)
 
-    # track acceptance rate and loss over
-    acceptance_rate = Float64[]
     # fit initial coefficients
     rows = sample(1:N, batch_size, replace=false)
-    assemble_matrix!(S, data.x[rows], F.ω)
+    assemble_matrix!(S, F.ϕ, data.x[rows], F.ω)
     for d_ in 1:dy
         options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
     end
 
 
+    # track acceptance rate and loss over
+    acceptance_rate = Float64[]
     loss = Float64[]
     p = Progress(options.n_epochs; enabled=show_progress)
 
@@ -928,7 +694,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
             # generate proposal
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
 
-            assemble_matrix!(S, data.x[rows], ω_proposal)
+            assemble_matrix!(S, F.ϕ, data.x[rows], ω_proposal)
             for d_ in 1:dy
                 options.linear_solve!(β_proposal[d_], S, data.yt[d_][rows], ω_proposal)
             end
@@ -967,7 +733,7 @@ function train_rwm(F₀::VectorFourierModel{TC,TR,TW,TB,TI}, data::VectorDataSet
         end
 
         # perform full β update
-        assemble_matrix!(S, data.x[rows], F.ω)
+        assemble_matrix!(S, F.ϕ, data.x[rows], F.ω)
         for d_ in 1:dy
             options.linear_solve!(F.βt[d_], S, data.yt[d_][rows], F.ω)
         end

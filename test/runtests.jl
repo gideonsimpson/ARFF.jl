@@ -23,8 +23,10 @@ end
 
 @testset "Linear Algebra" begin
     @test include("linalg/matrix1.jl")
+    @test include("linalg/matrix2.jl")
     @test include("linalg/normal1.jl")
     @test include("linalg/normal2.jl")
+    @test include("linalg/normal3.jl")
 end
 
 @testset "Options" begin
@@ -33,10 +35,14 @@ end
 
 @testset "Utilities" begin
     @test include("utils/utils1.jl")
+    @test include("utils/eval1.jl")
+    @test include("utils/eval2.jl")
+    @test include("utils/eval3.jl")
 end
 
 
 @testset "Training" begin
     @test include("train/train1.jl")
     @test include("train/train2.jl")
+    @test include("train/train3.jl")
 end

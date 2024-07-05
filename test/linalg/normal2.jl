@@ -8,7 +8,7 @@ let
     x = [Float64[i] for i in 1:N]
     y = ComplexF64[cos(i) for i in 1:N]
     ω = [Float64[k] for k in 1:K]
-    ARFF.assemble_matrix!(S, x, ω)
+    ARFF.assemble_matrix!(S,FourierActivation, x, ω)
 
     β = zeros(ComplexF64, K)
     solve_normal_svd!(β, S, y, λ=λ)

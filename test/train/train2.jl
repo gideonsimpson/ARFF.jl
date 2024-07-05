@@ -6,7 +6,7 @@ let
     Random.seed!(100)
     x_data = [randn(2) for _ in 1:N]
     y_data = f.(x_data);
-    data = DataSet(x_data, y_data);
+    data = DataSet(x_data, complex.(y_data));
 
     K = 2^6
     Random.seed!(200)
@@ -21,7 +21,7 @@ let
     n_epochs = 1 * 10^2 # total number of iterations
     n_ω_steps = 10 # number of steps between full β updates
     n_burn = n_epochs ÷ 10
-    @show γ = optimal_γ(d)
+    γ = optimal_γ(d)
     ω_max = Inf
     adapt_covariance = true
 

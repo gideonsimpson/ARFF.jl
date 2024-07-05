@@ -7,32 +7,15 @@ Structure containing a scalar valued fourier model which will be learned
 * `ω` - Array of wave vectors
 * `K` - Number of Fourier features
 * `dx` - Dimension of `x` coordinate
+* `ϕ` - Activation function
 """
-struct ScalarFourierModel{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TI<:Integer} <: AbstractFourierModel
-    β::Vector{TC}
-    ω::Vector{TW}
+struct ScalarFourierModel{TR,TB,TI,TA} <: AbstractFourierModel where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+    β::Vector{TB}
+    ω::Vector{Vector{TR}}
     K::TI
     dx::TI
+    ϕ::TA
 end
-
-"""
-    ScalarFourierModel{TB<:Complex,TW<:AbstractArray{AbstractFloat}} 
-
-Structure containing a scalar valued fourier model which will be learned
-### Fields
-* `β` - Array of complex coefficients
-* `ω` - Array of wave vectors
-* `K` - Number of Fourier features
-* `dx` - Dimension of `x` coordinate
-"""
-struct ScalarFeatureModel{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TI<:Integer,FF<:Function} <: AbstractFourierModel
-    β::Vector{TC}
-    ω::Vector{TW}
-    K::TI
-    dx::TI
-    ϕ::FF
-end
-
 
 """
     VectorFourierModel{TB<:Complex,TW<:AbstractArray{AbstractFloat}} 
@@ -46,35 +29,14 @@ Structure containing a scalar valued fourier model which will be learned
 * `dx` - Dimension of `x` coordinate
 * `dy` - Dimension of `y` coordinate
 """
-struct VectorFourierModel{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer} <: AbstractFourierModel
-    β::Vector{TB}
-    βt::Vector{TB}
-    ω::Vector{TW}
+struct VectorFourierModel{TR,TY,TI,TA} <: AbstractFourierModel where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+    β::Vector{Vector{TY}}
+    βt::Vector{Vector{TY}}
+    ω::Vector{Vector{TR}}
     K::TI
     dx::TI
     dy::TI
-end
-
-"""
-    VectorFeatureModel{TB<:Complex,TW<:AbstractArray{AbstractFloat}} 
-
-Structure containing a scalar valued fourier model which will be learned
-### Fields
-* `β` - Array of complex coefficients
-* `βt` - Transposed array of complex coefficients
-* `ω` - Array of wave vectors
-* `K` - Number of Fourier features
-* `dx` - Dimension of `x` coordinate
-* `dy` - Dimension of `y` coordinate
-"""
-struct VectorFeatureModel{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer,FF<:Function} <: AbstractFourierModel
-    β::Vector{TB}
-    βt::Vector{TB}
-    ω::Vector{TW}
-    K::TI
-    dx::TI
-    dy::TI
-    ϕ::FF
+    ϕ::TA
 end
 
 """
@@ -96,30 +58,11 @@ function Base.size(F::TF) where {TF<:ScalarFourierModel}
 end
 
 """
-    Base.size(F::TF) where {TF<:ScalarFeatureModel}
-
-TBW
-"""
-function Base.size(F::TF) where {TF<:ScalarFeatureModel}
-    return (F.K, F.dx)
-end
-
-
-"""
     Base.size(F::TF) where {TF<:VectorFourierModel}
 
 TBW
 """
 function Base.size(F::TF) where {TF<:VectorFourierModel}
-    return (F.K, F.dx, F.dy)
-end
-
-"""
-    Base.size(F::TF) where {TF<:VectorFeatureModel}
-
-TBW
-"""
-function Base.size(F::TF) where {TF<:VectorFeatureModel}
     return (F.K, F.dx, F.dy)
 end
 
@@ -146,19 +89,6 @@ function Base.iterate(F::TF, state=1) where {TF<:ScalarFourierModel}
 end
 
 """
-    Base.iterate(F::TF, state=1) where {TF<:ScalarFeatureModel}
-
-TBW
-"""
-function Base.iterate(F::TF, state=1) where {TF<:ScalarFeatureModel}
-    if state > F.K
-        return nothing
-    end
-    return (F.β[state], F.ω[state]), state + 1
-end
-
-
-"""
     Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
 
 TBW
@@ -171,61 +101,52 @@ function Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
 end
 
 """
-    Base.iterate(F::TF, state=1) where {TF<:VectorFeatureModel}
-
-TBW
-"""
-function Base.iterate(F::TF, state=1) where {TF<:VectorFeatureModel}
-    if state > F.K
-        return nothing
-    end
-    return (F.β[state], F.ω[state]), state + 1
-end
-
-"""
     FourierModel(β::Vector{TC}, ω::Vector{TW}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
 
 TBW
 """
-function FourierModel(β::Vector{TR}, ω::Vector{TW}) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
+function FourierModel(β::Vector{TR}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
-    return ScalarFourierModel(complex.(β), ω, K, dx)
+    TB = typeof(complex(β[1]));
+    return ScalarFourierModel(complex.(β), ω, K, dx, FourierActivation)
 end
 
 """
-    FourierModel(β::Vector{TC}, ω::Vector{TW}, ϕ::Function) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    FourierModel(β::Vector{TB}, ω::Vector{TW}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TW<:AbstractArray{TR},TA<:ActivationFunction{TB}}
 
 TBW
 """
-function FourierModel(β::Vector{TR}, ω::Vector{TW}, ϕ::Function) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
+function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TB}}
     K = length(ω)
     dx = length(ω[1])
-    return ScalarFeatureModel(complex.(β), ω, K, dx, ϕ)
+    return ScalarFourierModel(β, ω, K, dx, ϕ)
 end
 
+
 """
-    FourierModel(β::Vector{TB}, ω::Vector{TW}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC}}
+    FourierModel(β::Vector{Vector{TR}}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
 
 TBW
 """
-function FourierModel(β::Vector{TB}, ω::Vector{TW}) where {TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TR}}
+function FourierModel(β::Vector{Vector{TR}}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
-    return VectorFourierModel(complex.(β), [complex.([β_[d_] for β_ in β]) for d_ = 1:dy], ω, K, dx, dy)
+    TC = typeof(complex(β[1][1]));
+    return VectorFourierModel(complex.(β), [complex.([β_[d_] for β_ in β]) for d_ = 1:dy], ω, K, dx, dy, ActivationFunction{TC}(fourier))
 end
 
 """
-    FourierModel(β::Vector{TB}, ω::Vector{TW}, ϕ::TF) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC}, TF<:Function}
+    FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
 
 TBW
 """
-function FourierModel(β::Vector{TB}, ω::Vector{TW}, ϕ::TF) where {TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TR}, TF<:Function}
+function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
-    return VectorFeatureModel(complex.(β), [complex.([β_[d_] for β_ in β]) for d_ = 1:dy], ω, K, dx, dy, ϕ)
+    return VectorFourierModel(β, [[β_[d_] for β_ in β] for d_ = 1:dy], ω, K, dx, dy, ϕ)
 end
 
 """
@@ -242,19 +163,6 @@ function copy_from_transpose!(F::VectorFourierModel)
     F
 end
 
-"""
-    copy_from_transpose!(F::VectorFeatureModel)
-
-TBW
-"""
-function copy_from_transpose!(F::VectorFeatureModel)
-    for d_ in 1:F.dy
-        for k in 1:F.K
-            F.β[k][d_] = F.βt[d_][k]
-        end
-    end
-    F
-end
 
 """
     copy_to_transpose!(F::VectorFourierModel)
@@ -262,20 +170,6 @@ end
 TBW
 """
 function copy_to_transpose!(F::VectorFourierModel)
-    for d_ in 1:F.dy
-        for k in 1:F.K
-            F.βt[d_][k] = F.β[k][d_]
-        end
-    end
-    F
-end
-
-"""
-    copy_to_transpose!(F::VectorFeatureModel)
-
-TBW
-"""
-function copy_to_transpose!(F::VectorFeatureModel)
     for d_ in 1:F.dy
         for k in 1:F.K
             F.βt[d_][k] = F.β[k][d_]

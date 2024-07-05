@@ -10,9 +10,9 @@ arrays of y values.
 * `N` - Number of data points
 * `dx` - Dimension of `x` coordinates
 """
-struct ScalarDataSet{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TI<:Integer} <: AbstractDataSet
-    x::Vector{TW}
-    y::Vector{TC}
+struct ScalarDataSet{TR,TB,TI} <: AbstractDataSet where {TR<:AbstractFloat, TB<:Number,  TI<:Integer}
+    x::Vector{Vector{TR}}
+    y::Vector{TB}
     N::TI
     dx::TI
 end
@@ -31,10 +31,10 @@ arrays of y values.
 * `dx` - Dimension of `x` coordinates
 * `dy` - Dimension of `y` coordinates
 """
-struct VectorDataSet{TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer} <: AbstractDataSet
-    x::Vector{TW}
-    y::Vector{TB}
-    yt::Vector{TB}
+struct VectorDataSet{TR,TY,TI} <: AbstractDataSet where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
+    x::Vector{Vector{TR}}
+    y::Vector{Vector{TY}}
+    yt::Vector{Vector{TY}}
     N::TI
     dx::TI
     dy::TI
@@ -108,31 +108,31 @@ end
 """
     DataSet(x::Vector{TW}, y::Vector{TR}) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
 
-Convenience constructor for real valued y data
+Convenience constructor
 ### Fields
 * `x` - Array of real valued vectors 
-* `y` - Array of real scalars
+* `y` - Array of scalars
 """
-function DataSet(x::Vector{TW}, y::Vector{TR}) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
+function DataSet(x::Vector{Vector{TR}}, y::Vector{TY}) where {TR<:AbstractFloat,TY<:Number}
     N = length(x);
     dx = length(x[1]);
-    return ScalarDataSet(x, complex.(y), N, dx)
+    return ScalarDataSet(x, y, N, dx)
 end
 
 
 """
-    DataSet(x::Vector{TW}, y::Vector{TR}) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TY<:Number, TR<:AbstractFloat}
 
-Convenience constructor for real valued y data.  The data is assumed to be
-formatted as `(x[i],y[i])` pairs.
+Convenience constructor.  The data is assumed to be formatted as `(x[i],y[i])`
+pairs.
 ### Fields
 * `x` - Array of real valued vectors 
-* `y` - Array of real valued vectors
+* `y` - Array of vectors
 """
-function DataSet(x::Vector{TW}, y::Vector{TB}) where {TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TR}}
+function DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TY<:Number, TR<:AbstractFloat}
     N = length(x)
     dx = length(x[1])
     dy = length(y[1])
-    return VectorDataSet(x, complex.(y), [complex.([y_[i] for y_ in y]) for i = 1:dy], N, dx, dy)
+    return VectorDataSet(x, y, [[y_[i] for y_ in y] for i = 1:dy], N, dx, dy)
 end
 
