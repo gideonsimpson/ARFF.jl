@@ -18,8 +18,11 @@ corresponds to the Fourier feature model.
 """
 function (F::ScalarFourierModel{TR,TB,TI,TA})(x::Vector{TR}) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     y = zero(TB)
-    for (β, ω) in F
-        y += β * F.ϕ(x,ω)
+    # for (β, ω) in F
+    #     y += β * F.ϕ(x,ω)
+    # end
+    for i in 1:F.K
+        y += F.β[i] * F.ϕ(x, F.ω[i]);
     end
     return y
 

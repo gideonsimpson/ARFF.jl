@@ -38,6 +38,8 @@ end
     @test include("utils/eval1.jl")
     @test include("utils/eval2.jl")
     @test include("utils/eval3.jl")
+    @test include("utils/eval4.jl")
+    @test include("utils/eval5.jl")
 end
 
 

@@ -1,8 +1,9 @@
-struct ActivationFunction{TB<:Number} <: AbstractActivationFunction
-    σ::Function # activation function that is TB valued
+struct ActivationFunction{TB,TF} <: AbstractActivationFunction where {TB<:Number,TF<:Function}
+    σ::TF # activation function that is TB valued
 end
+ActivationFunction{TB}(σ::TF) where {TB,TF} = ActivationFunction{TB,TF}(σ)
 
-function (ϕ::ActivationFunction{TB})(x::TW, ω::TW) where {TB<:Number,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+function (ϕ::ActivationFunction{TB})(x::Vector{TR}, ω::Vector{TR}) where {TB<:Number,TR<:AbstractFloat}
     return ϕ.σ(x⋅ω)
 end
 
@@ -34,7 +35,7 @@ function arctan(z)
     return atan(z)
 end
 
-# convenience structures
+# convenience constructions
 FourierActivation = ActivationFunction{ComplexF64}(fourier);
 SigmoidActivation = ActivationFunction{Float64}(sigmoid);
 ArcTanActivation = ActivationFunction{Float64}(arctan);
