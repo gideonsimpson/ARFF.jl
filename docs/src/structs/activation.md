@@ -15,10 +15,6 @@ This can then be passed in as an argument when defining a Fourier feature model.
 
 
 The `ActivationFunction` type can be evaluated:
-```@docs
-ActivationFunction{TB}(x::Vector{TR}, ω::Vector{TR}) where {TB<:Number,TR<:AbstractFloat}
-```
-so that
 ```@example 1
 println(ReLUActivation([-1.], [1.]));
 println(ReLUActivation([1.], [1.]));
