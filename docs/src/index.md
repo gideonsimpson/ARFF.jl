@@ -3,8 +3,8 @@
 Documentation for the adaptive random fourier features (ARFF) package.  This package is built around the methodology presented in [kammonen_adaptive_2020](@cite).
 
 Using the package involves three steps:
-* Formatting your training data into a [`DataSet`](@ref) structure
-* Initializing a [`FourierModel`](@ref) structure
+* Formatting your training data into a [`DataSet`](@ref dataset) structure
+* Initializing a [`FourierModel`]  structure
 * Training
 
 ## Overview 
@@ -26,6 +26,14 @@ S_{jk} = e^{ i \omega_k \cdot x_j},
 ```
 We presume that we have training data of size ``N``, ``\{(x_j,y_j)\}_{j=1}^N``.
 Other solutions are possible.
+
+This package generalizes the method to allow for both vector valued functions
+and permit activation functions other than the complex exponential:
+```math 
+f(x) = \sum_{k=1}^K \beta_k \varphi(x;\omega_k),
+```
+where now ``\beta_k \in \mathbb{R}^{d'}`` or ``\beta_k \in \mathbb{C}^{d'}``,
+where ``d'`` need not be the same as ``d``.
 
 ### Adaptivity
 To make the algorithm adaptive, that is to say, to sample the frequencies from

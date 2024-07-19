@@ -1,4 +1,7 @@
 # Training
+```@contents
+Pages = ["train.md"]
+```
 
 The key function is `train_rwm!`, which performs in place training on the model.
 This is implemented to handle the training data in several ways:
@@ -29,3 +32,4 @@ The functions are analogously named:
 ```@docs
 train_rwm
 ```
+This records the result at the end of each epoch.

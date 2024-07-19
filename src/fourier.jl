@@ -101,19 +101,20 @@ function Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
 end
 
 """
-    FourierModel(β::Vector{TC}, ω::Vector{TW}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    FourierModel(β::Vector{TR}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
 
 TBW
 """
-function FourierModel(β::Vector{TR}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
+function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}) where {TB <: Number,TR <: AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
-    TB = typeof(complex(β[1]));
-    return ScalarFourierModel(complex.(β), ω, K, dx, FourierActivation)
+    TC = typeof(complex(β[1]))
+
+    return ScalarFourierModel(complex.(β), ω, K, dx, ActivationFunction{TC}(fourier))
 end
 
 """
-    FourierModel(β::Vector{TB}, ω::Vector{TW}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TW<:AbstractArray{TR},TA<:ActivationFunction{TB}}
+    FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TB}}
 
 TBW
 """
@@ -129,7 +130,7 @@ end
 
 TBW
 """
-function FourierModel(β::Vector{Vector{TR}}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
+function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}) where {TB <: Number, TR <: AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])

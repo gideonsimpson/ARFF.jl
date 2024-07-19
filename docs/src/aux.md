@@ -1,4 +1,7 @@
 # Auxiliary Functions and Utilities
+```@contents
+Pages = ["aux.md"]
+```
 
 ## [Linear Algebra] (@id linalg)
 It is essential to be able solve for the updated ``\boldsymbol{\beta}`` when we update the ``\boldsymbol{\omega}``.  In a typical setting, this corresponds to solving
@@ -29,6 +32,9 @@ just ignored.  For [`solve_normal!`](@ref) we would implement this as:
 linear_solver! = (β, S, y, ω) -> solve_normal!(β, S, y)
 ```
 
+In the case that one is solving a vector valued problem, the vector valued
+``\beta``'s are obtained component by component against the vector valued
+``y``'s. 
 
 ## [Loss Functions] (@id loss)
 ```@docs

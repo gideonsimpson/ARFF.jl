@@ -106,9 +106,9 @@ end
 
 
 """
-    DataSet(x::Vector{TW}, y::Vector{TR}) where {TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    DataSet(x::Vector{Vector{TR}}, y::Vector{TY}) where {TR<:AbstractFloat,TY<:Number}
 
-Convenience constructor
+Convenience constructor for a scalar valued data set
 ### Fields
 * `x` - Array of real valued vectors 
 * `y` - Array of scalars
@@ -123,8 +123,7 @@ end
 """
     DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TY<:Number, TR<:AbstractFloat}
 
-Convenience constructor.  The data is assumed to be formatted as `(x[i],y[i])`
-pairs.
+Convenience constructor for a vector valued data set
 ### Fields
 * `x` - Array of real valued vectors 
 * `y` - Array of vectors

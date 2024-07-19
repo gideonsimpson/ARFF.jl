@@ -26,7 +26,7 @@ x = [0.1*rand(d) for _ in 1:n_x];
 y = [f(x_[1]) for x_ in x];
 
 # store data in DataSet structure
-data = DataSet(x,y);
+data = DataSet(x,complex.(y));
 
 scatter([x_[1] for x_ in x], y, label="Sample Points")
 xx = LinRange(0, 0.1, 500);
@@ -35,7 +35,7 @@ xlabel!("x")
 ```
 **Note**: When the domain of our target function is ``\mathbb{R}^1``, the
 ``x``-data must still be stored as an array of arrays of length one, not an
-array of scalars.  We also do not require [`DataScalings`](@ref) for this
+array of scalars.  We also do not require [`DataScalings`](@ref scalings) for this
 problem.
 
 ## Initialize Fourier Model
@@ -46,6 +46,7 @@ Random.seed!(200); # for reproducibility
 F0 = FourierModel([1. *randn(ComplexF64) for _ in 1:K],  
     [randn(d) for _ in 1:K]); nothing
 ```
+This uses the default complex exponential activation functions.
 
 ## Set Parameters and Train
 ```@example ex1
