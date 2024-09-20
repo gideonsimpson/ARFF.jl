@@ -22,16 +22,14 @@ end
 
 Structure containing a scalar valued fourier model which will be learned
 ### Fields
-* `β` - Array of complex coefficients
-* `βt` - Transposed array of complex coefficients
+* `β` - 2D array of coefficients; K by dy in size
 * `ω` - Array of wave vectors
 * `K` - Number of Fourier features
 * `dx` - Dimension of `x` coordinate
 * `dy` - Dimension of `y` coordinate
 """
 struct VectorFourierModel{TR,TY,TI,TA} <: AbstractFourierModel where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
-    β::Vector{Vector{TY}}
-    βt::Vector{Vector{TY}}
+    β::Matrix{TY}
     ω::Vector{Vector{TR}}
     K::TI
     dx::TI
@@ -97,7 +95,7 @@ function Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
     if state > F.K
         return nothing
     end
-    return (F.β[state], F.ω[state]), state + 1
+    return (F.β[state, :], F.ω[state]), state + 1
 end
 
 """
@@ -124,6 +122,34 @@ function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<
     return ScalarFourierModel(β, ω, K, dx, ϕ)
 end
 
+"""
+    FourierModel(β::Vector{Vector{TR}}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
+
+TBW
+"""
+function FourierModel(β::Matrix{TB}, ω::Vector{Vector{TR}}) where {TB<:Number,TR<:AbstractFloat}
+    K = length(ω)
+    dx = length(ω[1])
+    dy = length(β[1])
+    TC = typeof(complex(β[1,1]))
+
+    return VectorFourierModel(complex.(β), ω, K, dx, dy, ActivationFunction{TC}(fourier))
+end
+
+
+"""
+    FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
+
+TBW
+"""
+function FourierModel(β::Matrix{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
+    K = length(ω)
+    dx = length(ω[1])
+    dy = length(β[1])
+
+    return VectorFourierModel(β, ω, K, dx, dy, ϕ)
+end
+
 
 """
     FourierModel(β::Vector{Vector{TR}}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
@@ -135,7 +161,13 @@ function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}) where {TB 
     dx = length(ω[1])
     dy = length(β[1])
     TC = typeof(complex(β[1][1]));
-    return VectorFourierModel(complex.(β), [complex.([β_[d_] for β_ in β]) for d_ = 1:dy], ω, K, dx, dy, ActivationFunction{TC}(fourier))
+
+    β_ = zeros(TC, K, dx);
+    for k in 1:K
+        @. β_[k,:] = β[k];
+    end
+
+    return VectorFourierModel(β_, ω, K, dx, dy, ActivationFunction{TC}(fourier))
 end
 
 """
@@ -147,7 +179,14 @@ function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) wh
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
-    return VectorFourierModel(β, [[β_[d_] for β_ in β] for d_ = 1:dy], ω, K, dx, dy, ϕ)
+
+    β_ = zeros(TB, K, dx)
+    for k in 1:K
+        @. β_[k, :] = β[k]
+    end
+
+
+    return VectorFourierModel(β_, ω, K, dx, dy, ϕ)
 end
 
 """

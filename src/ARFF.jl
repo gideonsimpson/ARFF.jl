@@ -5,7 +5,7 @@ using Distributions
 using Statistics
 using Accessors
 using ProgressMeter
-using Flux
+#using Flux
 include("types.jl")
 include("activations.jl")
 include("fourier.jl")
@@ -21,7 +21,8 @@ include("train_vector.jl")
 export FourierModel, DataSet, ActivationFunction, ARFFOptions
 export train_rwm!, train_rwm
 export solve_normal!, solve_normal_svd!
-export optimal_γ, get_scalings, scale_data!,rescale_data!, convert_problem, convert_dataset
+export optimal_γ, get_scalings, scale_data!,rescale_data!
+#, convert_problem, convert_dataset
 export FourierActivation, SigmoidActivation, ArcTanActivation
 
 end # module ARFF
