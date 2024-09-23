@@ -47,4 +47,5 @@ end
     @test include("train/train1.jl")
     @test include("train/train2.jl")
     @test include("train/train3.jl")
+    @test include("train/train4.jl")
 end
