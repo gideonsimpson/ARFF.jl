@@ -1,6 +1,6 @@
 
 """
-    train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TB,TI}}, N::TI, batch_size::TI,  Σ::Matrix{TR}, options::ARFFOptions; show_progress=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+    train_rwm!(F, data_sets, N, batch_size,  Σ, options; show_progress=true)
 
 Train the Fourier feature model using a random walk Metropolis exploration
 strategy with batched data, which is cycled through from epoch to epoch.
@@ -126,7 +126,7 @@ function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets, N::TI, batch_
 end
 
 """
-    train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,TB,TI}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer, TA<:ActivationFunction{TB}}
+    train_rwm!(F, data, Σ, options; show_progress=true, record_loss=true)
 
 * `F` - The `FourierModel` to be trained
 * `data`- A `DataSet` training data set
@@ -144,7 +144,7 @@ function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,T
 end
 
 """
-    train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,TB,TI}, batch_size::TI, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+    train_rwm!(F, data, batch_size, Σ, options; show_progress=true, record_loss=true)
 
 * `F` - The `FourierModel` to be trained
 * `data`- A `DataSet` training data set
@@ -163,11 +163,11 @@ function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,T
 end
 
 """
-    train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+    train_rwm!(F, data_sets, Σ, options; show_progress=true, record_loss=true)
 
 * `F` - The `FourierModel` to be trained
-* `data_sets`- An iterable of `DataSet` training data sets.  These are presumed
-  to all be the same size.
+* `data_sets`- A vector of `DataSet` training data sets.  These are presumed
+  to all be the same size.  They will be cycled through each epoch.
 * `Σ` - Initial covariance matrix for RWM proposals
 * `options` - `ARFFOptions` structure specifcying the number epochs, proposal
   step size, etc.
@@ -179,7 +179,7 @@ end
 function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TB,TI}}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     N = length(first(data_sets))
 
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, data_sets, N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
+    Σ_mean, acceptance_rate, loss = train_rwm!(F, Iterators.cycle(data_sets), N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
     return Σ_mean, acceptance_rate, loss
 end
 
@@ -315,7 +315,7 @@ function train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data_sets, N::TI, batc
 end
 
 """
-    train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,TB,TI}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+    train_rwm(F₀, data, Σ, options; show_progress=true, record_loss=true)
 
 * `F₀` - The initial state of the `FourierModel` to be trained
 * `data`- A `DataSet` training data set
@@ -333,7 +333,7 @@ function train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR
 end
 
 """
-    train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,TB,TI}, batch_size::TI, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+    train_rwm(F₀, data, batch_size, Σ, options; show_progress=true, record_loss=true)
 
 * `F₀` - The initial state of the `FourierModel` to be trained
 * `data`- A `DataSet` training data set
@@ -355,8 +355,8 @@ end
     train_rwm(F₀, data_sets, Σ, options; show_progress=true, record_loss=true) 
 
 * `F₀` - The initial state of the `FourierModel` to be trained
-* `data_sets`- An iterable of `DataSet` training data sets.  These are presumed
-  to all be the same size.
+* `data_sets`- A vector of `DataSet` training data sets.  These are presumed
+  to all be the same size.  They will be cycled through each epoch.
 * `Σ` - Initial covariance matrix for RWM proposals
 * `options` - `ARFFOptions` structure specifcying the number epochs, proposal
   step size, etc.
@@ -367,7 +367,7 @@ end
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TB,TI}}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     N = length(first(data_sets))
-    F_trajectory, Σ_mean, acceptance_rate, loss = train_rwm(F₀, data_sets, N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
+    F_trajectory, Σ_mean, acceptance_rate, loss = train_rwm(F₀, Iterators.cycle(data_sets), N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
 
     return F_trajectory, Σ_mean, acceptance_rate, loss
 end

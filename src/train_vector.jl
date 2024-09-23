@@ -193,8 +193,8 @@ strategy
 
 ### Fields
 * `F` - The `FourierModel` to be trained
-* `data_sets`- An iterable of `DataSet` training data sets.  These are presumed
-  to all be the same size.
+* `data_sets`- A vector of `DataSet` training data sets.  These are presumed
+  to all be the same size.  They will be cycled through each epoch.
 * `Σ` - Initial covariance matrix for RWM proposals
 * `options` - `ARFFOptions` structure specifcying the number epochs, proposal step size, etc.
 * `show_progress=true` - Display training progress using `ProgressMeter`
@@ -204,7 +204,7 @@ function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data_sets::Vector{Vector
     Σ::Matrix{TR}, options::ARFFOptions;
     show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     N = length(first(data_sets))
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, data_sets, N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
+    Σ_mean, acceptance_rate, loss = train_rwm!(F, Iterators.cycle(data_sets), N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
 
     return Σ_mean, acceptance_rate, loss
 end
@@ -218,8 +218,8 @@ strategy
 
 ### Fields
 * `F` - The `FourierModel` to be trained
-* `data_sets`- An iterable of `DataSet` training data sets.  These are presumed
-  to all be the same size.  They are cycled through each epoch.
+* `data_sets`- A vector of `DataSet` training data sets.  These are presumed
+  to all be the same size.  They will be cycled through each epoch.
 * `N` - Length of each data set in `data_sets`.
 * `batch_size` - Minibatching parameter, for subsampling at each epoch.
 * `Σ` - Initial covariance matrix for RWM proposals
@@ -409,7 +409,8 @@ strategy
 
 ### Fields
 * `F₀` - The `FourierModel` to be trained
-* `data_sets`- An iterable of `DataSet` training data sets.  These are presumed
+* `data_sets`- A vector of `DataSet` training data sets.  These are presumed
+  to all be the same size.  They will be cycled through each epoch.
 * `batch_size` - Minibatch size
 * `Σ` - Initial covariance matrix for RWM proposals
 * `options` - `ARFFOptions` structure specifcying the number epochs, proposal step size, etc.
@@ -420,7 +421,7 @@ function train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, data_sets::Vector{Vect
     Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     N = length(first(data_sets))
-    F_trajectory, Σ_mean, acceptance_rate, loss = train_rwm(F₀, data_sets, N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
+    F_trajectory, Σ_mean, acceptance_rate, loss = train_rwm(F₀, Iterators.cycle(data_sets), N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
 
     return F_trajectory, Σ_mean, acceptance_rate, loss
 end

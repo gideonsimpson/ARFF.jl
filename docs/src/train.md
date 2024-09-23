@@ -6,12 +6,15 @@ Pages = ["train.md"]
 The key function is `train_rwm!`, which performs in place training on the model.
 This is implemented to handle the training data in several ways:
 * A single `DataSet` can be provided and used in every training epoch.
-* An array of `DataSet` types can be provided, and they will be cycled through each epoch;
 * A single `DataSet` and a minibatch size can be provided, and minibatchs will be generated at each epoch.
+* An array of `DataSet` types can be provided, and they will be cycled through each epoch;
 
 ## In Place Training
+For both the scalar and vector valued case, we have the following commands:
 ```@docs
-    train_rwm!
+    train_rwm!(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data::ARFF.ScalarDataSet{TR,TB,TI}, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer, TA<:ARFF.ActivationFunction{TB}}
+    train_rwm!(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data::ARFF.ScalarDataSet{TR,TB,TI}, batch_size::TI, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ARFF.ActivationFunction{TB}}    
+    train_rwm!(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ARFF.ScalarDataSet{TR,TB,TI}}, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ARFF.ActivationFunction{TB}}
 ```
 Having created an initial `F` we can then call
 ```
@@ -30,6 +33,8 @@ F_trajectory, Σ_mean, acceptance_rate, loss = train_rwm(F0, data, Σ0, opts);
 
 The functions are analogously named:
 ```@docs
-train_rwm
+    train_rwm(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data::ARFF.ScalarDataSet{TR,TB,TI}, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer, TA<:ARFF.ActivationFunction{TB}}
+    train_rwm(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data::ARFF.ScalarDataSet{TR,TB,TI}, batch_size::TI, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ARFF.ActivationFunction{TB}}    
+    train_rwm(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ARFF.ScalarDataSet{TR,TB,TI}}, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ARFF.ActivationFunction{TB}}
 ```
 This records the result at the end of each epoch.
