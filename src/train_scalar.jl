@@ -176,7 +176,7 @@ end
   record
 
 """
-function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TB,TI}}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     N = length(first(data_sets))
 
     Σ_mean, acceptance_rate, loss = train_rwm!(F, data_sets, N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
@@ -352,7 +352,7 @@ function train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR
 end
 
 """
-    train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data_sets, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+    train_rwm(F₀, data_sets, Σ, options; show_progress=true, record_loss=true) 
 
 * `F₀` - The initial state of the `FourierModel` to be trained
 * `data_sets`- An iterable of `DataSet` training data sets.  These are presumed
@@ -365,7 +365,7 @@ end
   record
 
 """
-function train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data_sets, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+function train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TB,TI}}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     N = length(first(data_sets))
     F_trajectory, Σ_mean, acceptance_rate, loss = train_rwm(F₀, data_sets, N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
 
