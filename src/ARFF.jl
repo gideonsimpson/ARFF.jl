@@ -22,6 +22,7 @@ export FourierModel, DataSet, ActivationFunction, ARFFOptions
 export train_rwm!, train_rwm
 export solve_normal!, solve_normal_svd!
 export optimal_γ, get_scalings, scale_data!,rescale_data!
+export append_bias
 #, convert_problem, convert_dataset
 export FourierActivation, SigmoidActivation, ArcTanActivation
 
