@@ -11,6 +11,7 @@ let
 
     # store data in DataSet structure
     data_ = DataSet(x, y)
+    # add bias term
     data = append_bias(data_);
     
     K = 2^4

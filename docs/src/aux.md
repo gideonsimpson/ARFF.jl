@@ -50,6 +50,16 @@ function loss_function(F, data_x, data_y)
 end
 ```
 
+## [Adding Bias] (@id bias)
+```@docs
+append_bias(data::ARFF.ScalarDataSet{TR,TY,TI}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
+append_bias(scalings::ARFF.ScalarDataScalings{TR,TY}) where {TY<:Number,TR<:AbstractFloat}
+```
+This modifies an existing data set or data scalings type such that we can include a constant bias term in our model,
+```math
+x\mapsto (x,1)=\tilde{x}.
+```
+
 
 ## Other Utilities
 ```@docs

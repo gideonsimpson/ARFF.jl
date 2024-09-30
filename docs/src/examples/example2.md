@@ -4,7 +4,7 @@ This example demonstates learning with generalized activation functions.  For th
 ```math
 f(x) = e^{-x^2/2}.
 ```
-and we will work with sigmoid activation functions.  For this problem, we will augment our data to allow for a bias term, training, with an abuse of
+and we will work with sigmoid activation functions.  For this problem, we will augment our data to allow for a bias term, training, with an abuse of notation,
 ```math
 f(x) \approx F(\tilde{x}=(x,1)) = \sum_{k} \beta_k \varphi(\tilde{x};\omega_k).
 ```
@@ -23,11 +23,14 @@ f(x) = exp(-0.5 * (x^2));
 n_x = 100; # number of training points
 d = 2;
 Random.seed!(100); # for reproducibility
-x = [[4*rand(),1] for _ in 1:n_x]; # generate n_x sample points, storying them as an array of 1D points
+# generate n_x sample points
+x = [[4*rand()] for _ in 1:n_x]; 
 y = [f(x_[1]) for x_ in x];
 
 # store data in DataSet structure
-data = DataSet(x,y);
+data_ = DataSet(x,y);
+# append the bias term to our data
+data = append_bias(data_);
 
 scatter([x_[1] for x_ in x], y, label="Sample Points")
 xx = LinRange(0, 4, 100);
