@@ -40,6 +40,7 @@ end
     @test include("utils/eval3.jl")
     @test include("utils/eval4.jl")
     @test include("utils/eval5.jl")
+    @test include("utils/bias1.jl")
 end
 
 

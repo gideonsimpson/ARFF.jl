@@ -55,10 +55,11 @@ end
 append_bias(data::ARFF.ScalarDataSet{TR,TY,TI}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
 append_bias(scalings::ARFF.ScalarDataScalings{TR,TY}) where {TY<:Number,TR<:AbstractFloat}
 ```
-This modifies an existing data set or data scalings type such that we can include a constant bias term in our model,
+This modifies an existing data set or data scalings type such that we can include a constant bias term in our model, if ``x\in \mathbb{R}^d``, then 
 ```math
-x\mapsto (x,1)=\tilde{x}.
+x\mapsto (x,1)=\tilde{x}\in \mathbb{R}^{d+1}.
 ```
+This is relevant when using generalized activation functions; see [Scalar Example with Generalized Activation Functions](@ref).
 
 
 ## Other Utilities
