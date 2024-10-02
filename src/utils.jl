@@ -121,7 +121,7 @@ the `x` coordinate.
 * `scalings` - scalings to be augmented
 """
 function append_bias(scalings::ScalarDataScalings{TR,TY}) where {TY<:Number,TR<:AbstractFloat}
-    return ScalarDataScalings([scalings.μx; zero(TR)], [scalings.μx; one(TR)], scalings.μy, scalings.σ2y)
+    return ScalarDataScalings([scalings.μx; zero(TR)], [scalings.σ2x; one(TR)], scalings.μy, scalings.σ2y)
 end
 
 
@@ -134,6 +134,6 @@ the `x` coordinate.
 * `scalings` - scalings to be augmented
 """
 function append_bias(scalings::VectorDataScalings{TR,TY}) where {TY<:Number,TR<:AbstractFloat}
-    return VectorDataScalings([scalings.μx; zero(TR)], [scalings.μx; one(TR)], scalings.μy, scalings.σ2y)
+    return VectorDataScalings([scalings.μx; zero(TR)], [scalings.σ2x; one(TR)], scalings.μy, scalings.σ2y)
 end
 
