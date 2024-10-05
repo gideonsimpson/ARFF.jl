@@ -27,7 +27,7 @@ makedocs(checkdocs=:none,
         "Training" => "train.md",
         "Auxiliary Functions and Utilities"=>"aux.md",
         "Examples" => ["examples/example1.md", 
-            "examples/example2.md", "examples/vector1.md"]
+            "examples/example2.md", "examples/example3.md", "examples/vector1.md"]
     ])
 deploydocs(;
     repo="github.com/gideonsimpson/ARFF.jl",
