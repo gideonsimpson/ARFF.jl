@@ -1,7 +1,7 @@
 name = "ARFF"
 uuid = "03926bf8-310c-4850-8d91-b2e1be9566e4"
 authors = ["Gideon Simpson <gideon.simpson@gmail.com>"]
-version = "0.3.2"
+version = "0.3.3"
 
 [deps]
 Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"

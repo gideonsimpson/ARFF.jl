@@ -1,16 +1,16 @@
 # Vector Valued Example
 
-This example demonstarates learning a vector valued problem with
+This example demonstarates learning a vector valued problem,
 ```math
 f(x) = \begin{pmatrix}x_1 x_2\\x_1^2 - x_2^2\end{pmatrix}
 ```
-
-```@example ex3
+```@setup ex3
 using Random
 using Plots
 using LinearAlgebra
 using ARFF
-
+```
+```@example ex3
 # define components of vector valued function
 f1(x) = x[1]*x[2];
 f2(x) = x[1]^2 - x[2]^2;

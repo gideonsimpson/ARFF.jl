@@ -11,13 +11,14 @@ f(x) \approx F(\tilde{x}=(x,1)) = \sum_{k} \beta_k \varphi(\tilde{x};\omega_k).
 The ``\tilde{x}`` is the variable padded with a unit value.  Thus, the problem will be studied as though it were over ``\mathbb{R}^2``.
 
 ## Generate Training Data
-First, we will generate and visualize the training data:
-```@example ex2
+```@setup ex2
 using Random
 using Plots
 using LinearAlgebra
 using ARFF
-
+```
+First, we will generate and visualize the training data:
+```@example ex2
 f(x) = exp(-0.5 * (x^2));
 
 n_x = 100; # number of training points
