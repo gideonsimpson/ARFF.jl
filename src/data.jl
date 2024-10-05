@@ -116,7 +116,7 @@ Convenience constructor for a scalar valued data set
 function DataSet(x::Vector{Vector{TR}}, y::Vector{TY}) where {TR<:AbstractFloat,TY<:Number}
     N = length(x);
     dx = length(x[1]);
-    return ScalarDataSet(x, y, N, dx)
+    return ScalarDataSet(deepcopy(x), deepcopy(y), N, dx)
 end
 
 
@@ -132,6 +132,6 @@ function DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TY<:Number
     N = length(x)
     dx = length(x[1])
     dy = length(y[1])
-    return VectorDataSet(x, y, [[y_[i] for y_ in y] for i = 1:dy], N, dx, dy)
+    return VectorDataSet(deepcopy(x), deepcopy(y), deepcopy([[y_[i] for y_ in y] for i = 1:dy]), N, dx, dy)
 end
 
