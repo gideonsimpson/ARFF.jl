@@ -1,6 +1,6 @@
 
 """
-    optimal_γ(d::Integer)
+    optimal_γ(d)
 
 Compute the optimal γ parameter as a function of dimension `d`
 ### Fields
