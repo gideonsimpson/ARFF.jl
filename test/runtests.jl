@@ -41,6 +41,7 @@ end
     @test include("utils/eval4.jl")
     @test include("utils/eval5.jl")
     @test include("utils/bias1.jl")
+    @test include("utils/bias2.jl")
 end
 
 
