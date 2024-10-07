@@ -9,9 +9,9 @@ Using the package involves three steps:
 
 ## Overview 
 The essential idea of ARFF is to make an approximation of a true function,
-``f_{\rm true}:\mathbb{R}^d\to \mathbb{C}``, as
+``f^\dagger:\mathbb{R}^d\to \mathbb{C}``, as
 ```math
-f_{\rm true}(x) \approx f(x) = \sum_{k=1}^K \beta_k e^{i \omega_k \cdot x}
+f^\dagger(x) \approx f(x) = \sum_{k=1}^K \beta_k e^{i \omega_k \cdot x}
 ```
 where ``x,\omega_k\in \mathbb{R}^d``, while ``\beta_k\in\mathbb{C}``.  In the
 naive random Fourier featuer setting, the ``\omega_k`` are sampled from some

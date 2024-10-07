@@ -1,7 +1,7 @@
 # Fourier Feature Models
 The generalized fourier features model approximates functions with ``K`` features, with acvtivation function ``\varphi`` as
 ```math
-f_{\rm true}(x) \approx f(x) = \sum_{k=1}^K \beta_k \varphi(x;\omega_k).
+f^\dagger(x) \approx f(x) = \sum_{k=1}^K \beta_k \varphi(x;\omega_k).
 ```
 In the above expression, ``x,\omega_k\in \mathbb{R}^d``, while
 ``\beta_k\in\mathbb{R}^{d'}`` or ``\beta_k\in\mathbb{C}^{d'}``, depending on the choice of activation function.  Consequently, our model is uniquely determined by the
