@@ -1,4 +1,4 @@
-# Fourier Feature Models
+# [Fourier Feature Models] (@id fourier)
 The generalized fourier features model approximates functions with ``K`` features, with acvtivation function ``\varphi`` as
 ```math
 f^\dagger(x) \approx f(x) = \sum_{k=1}^K \beta_k \varphi(x;\omega_k).

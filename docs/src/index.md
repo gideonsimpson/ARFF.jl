@@ -4,7 +4,7 @@ Documentation for the adaptive random fourier features (ARFF) package.  This pac
 
 Using the package involves three steps:
 * Formatting your training data into a [`DataSet`](@ref dataset) structure
-* Initializing a [`FourierModel`]  structure
+* Initializing a [`FourierModel`](@ref fourier)  structure
 * Training
 
 ## Overview 
