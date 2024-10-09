@@ -49,10 +49,12 @@ Perturb the vector ``\boldsymbol{\omega}`` of wave numbers with a Gaussian,
 ```math
 \boldsymbol{\omega}' = \boldsymbol{\omega} + \delta \boldsymbol{\xi}, \quad \boldsymbol{\xi}\sim N(0, \Sigma)
 ```
-where ``\delta>0`` is a proposal step size and  ``\Sigma`` is a covariance matrix. 
+where ``\delta>0`` is a proposal step size and  ``\Sigma`` is a covariance
+matrix. 
 
 #### Update Amplitudes
-Compute the proposed amplitudes, ``\boldsymbol{\beta}`` for the perturbed wave numbers, by building up the new design matrix and solving the linear system. 
+Compute the proposed amplitudes, ``\boldsymbol{\beta}`` for the perturbed wave
+numbers, by building up the new design matrix and solving the linear system. 
 
 #### Accept/Reject
 Accept/reject each wave vector ``\omega_k`` with probability

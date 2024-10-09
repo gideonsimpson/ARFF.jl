@@ -73,7 +73,7 @@ end
     Base.size(D::TD) where {TD<:VectorDataSet}
 
 Returns the tuple `(N, dx, dy)` of the number of samples, `N`, the dimension of
-the domain, `dx`, and hte dimension of the range, `dy`, of a `VectorDataSet`.
+the domain, `dx`, and the dimension of the range, `dy`, of a `VectorDataSet`.
 """
 function Base.size(D::TD) where {TD<:VectorDataSet}
     return (D.N, D.dx, D.dy)
@@ -83,7 +83,7 @@ end
 """
     Base.iterate(D::TD, state=1) where {TD<:ScalarDataSet}
 
-TBW
+Iterate through the `(xᵢ, yᵢ)` pairs in the data set.
 """
 function Base.iterate(D::TD, state=1) where {TD<:ScalarDataSet}
     if state > D.N
@@ -96,7 +96,7 @@ end
 """
     Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
 
-TBW
+Iterate through the `(xᵢ, yᵢ)` pairs in the data set.
 """
 function Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
     if state > D.N

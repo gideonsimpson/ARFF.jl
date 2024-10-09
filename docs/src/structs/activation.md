@@ -5,7 +5,9 @@ to be encoded in an `ActivationFunction` data structure.
 ```@docs
 ActivationFunction
 ```
-This structure encodes both the function, along with the return data type (real or complex) to ensure type consistency for performance.  The following example would define the ReLU activation function:
+This structure encodes both the function, along with the return data type (real
+or complex) to ensure type consistency for performance.  The following example
+would define the ReLU activation function:
 ```@example 1
 using ARFF
 relu(z) = z*(z>0);
