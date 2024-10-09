@@ -64,7 +64,7 @@ temperature.
 
 ### Training
 Having described a single the RWM step, the core of ARFF training requires  a
-total number of epochs (`n_epoch`) and number of RWM steps (`n_ω_steps`).  The
+total number of epochs (`n_epochs`) and number of RWM steps (`n_ω_steps`).  The
 core of the training loop consists of:
 ```
 for i in 1:n_epochs

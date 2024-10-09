@@ -43,7 +43,7 @@ end
 """
     Base.length(D::TD) where {TD<:AbstractDataSet}
 
-TBW
+Return the number of data points in the data set.
 """
 function Base.length(D::TD) where {TD<:AbstractDataSet}
     return D.N
@@ -52,7 +52,7 @@ end
 """
     Base.isempty(D::TD) where {TD<:AbstractDataSet}
 
-TBW
+Determine if the data set is trivial (zero entries) or not. 
 """
 function Base.isempty(D::TD) where {TD<:AbstractDataSet}
     return isempty(D.x)
@@ -62,7 +62,8 @@ end
 """
     Base.size(D::TD) where {TD<:ScalarDataSet}
 
-TBW
+Returns the tuple `(N, dx)` of the number of samples, `N`, and the dimension of
+the domain, `dx`, of a `ScalarDataSet`.
 """
 function Base.size(D::TD) where {TD<:ScalarDataSet}
     return (D.N, D.dx)
@@ -71,7 +72,8 @@ end
 """
     Base.size(D::TD) where {TD<:VectorDataSet}
 
-TBW
+Returns the tuple `(N, dx, dy)` of the number of samples, `N`, the dimension of
+the domain, `dx`, and hte dimension of the range, `dy`, of a `VectorDataSet`.
 """
 function Base.size(D::TD) where {TD<:VectorDataSet}
     return (D.N, D.dx, D.dy)
@@ -104,11 +106,10 @@ function Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
 end
 
 
-
 """
-    DataSet(x::Vector{Vector{TR}}, y::Vector{TY}) where {TR<:AbstractFloat,TY<:Number}
+    DataSet(x, y)
 
-Convenience constructor for a scalar valued data set
+Constructor for a `ScalarDataSet`
 ### Fields
 * `x` - Array of real valued vectors 
 * `y` - Array of scalars
@@ -121,9 +122,9 @@ end
 
 
 """
-    DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TY<:Number, TR<:AbstractFloat}
+    DataSet(x, y)
 
-Convenience constructor for a vector valued data set
+Constructor for a `VectorDataSet`
 ### Fields
 * `x` - Array of real valued vectors 
 * `y` - Array of vectors

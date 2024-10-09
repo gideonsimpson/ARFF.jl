@@ -32,7 +32,7 @@ end
     ARFFOptions(n_epochs::TI, n_ω_steps::TI, n_burn::TI, γ::TI,
     ω_max::TF, adapt_covariance::TB, linear_solve!::TS, loss::TL) where {TI<:Integer,TF<:AbstractFloat,TB<:Bool,TL,TS}
 
-Convenience constructor for older version of options
+Constructor for older version of options
 """
 function ARFFOptions(n_epochs::TI, n_ω_steps::TI, n_burn::TI, γ::TI,
     ω_max::TF, adapt_covariance::TB, linear_solve!::TS, loss::TL) where {TI<:Integer,TF<:AbstractFloat,TB<:Bool,TL,TS}

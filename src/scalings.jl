@@ -36,9 +36,9 @@ end
 
 
 """
-    get_scalings(data::ScalarDataSet{TC,TR,TW,TI}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TI<:Integer}
+    get_scalings(data) 
 
-Find the means and variances of the data for scaling
+Find the means and variances of the data for scaling.
 ### Fields
 * `data` - The training data set
 """
@@ -54,7 +54,7 @@ end
 
 
 """
-    get_scalings(data::VectorDataSet{TC,TR,TW,TB,TI}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TB<:AbstractArray{TC},TI<:Integer}
+    get_scalings(data)
 
 Find the means and variances of the data for scaling
 ### Fields
@@ -70,7 +70,7 @@ function get_scalings(data::VectorDataSet)
 end
 
 """
-    scale_data!(data::ScalarDataSet{TC,TR,TW,TI}, scalings::ScalarDataScalings{TC,TR,TW}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR},TI<:Integer}
+    scale_data!(data, scalings)
 
 Scale the data set (in-place) according to the specified scalings
 ### Fields
@@ -88,7 +88,7 @@ function scale_data!(data::ScalarDataSet{TR,TY,TI}, scalings::ScalarDataScalings
 end
 
 """
-    scale_data!(data::VectorDataSet{TC,TR,TW,TB,TI}, scalings::VectorDataScalings{TC,TR,TW,TB}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}, TB<:AbstractArray{TC},TI<:Integer}
+    scale_data!(data, scalings)
 
 Scale the data set (in-place) according to the specified scalings
 ### Fields
@@ -109,7 +109,7 @@ function scale_data!(data::VectorDataSet{TR,TY,TI}, scalings::VectorDataScalings
 end
 
 """
-    rescale_data!(data::ScalarDataSet{TC,TR,TW}, scalings::ScalarDataScalings{TC,TR,TW}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    rescale_data!(data, scalings)
 
 Rescale the data set (in-place) according back to the original units
 ### Fields
@@ -128,7 +128,7 @@ end
 
 
 """
-    rescale_data!(data::VectorDataSet{TC,TR,TW,TB}, scalings::VectorDataScalings{TC,TR,TW,TB}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}, TB<:AbstractArray{TC}}
+    rescale_data!(data, scalings)
 
 Rescale the data set (in-place) according back to the original units
 ### Fields

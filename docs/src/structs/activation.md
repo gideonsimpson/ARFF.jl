@@ -1,6 +1,6 @@
-# Activation Functions
+# [Activation Functions] (@id activation)
 While the theory has been developed for the Fourier activation functions of type
-```e^{i \omega \cdot x}```, this module permits for general activation funcitons
+``e^{i \omega \cdot x}``, this module permits for general activation funcitons
 to be encoded in an `ActivationFunction` data structure.  
 ```@docs
 ActivationFunction
@@ -20,9 +20,9 @@ println(ReLUActivation([-1.], [1.]));
 println(ReLUActivation([1.], [1.]));
 ```
 
-**NOTE** It is essential that the data type, `TN` used when defining
-`ActivationFunction{TN}(myactfunc)` must be the same as the numerical type of
-`y` used in the construction of a data set.
+**NOTE** It is essential that the data type, `TN`, used when defining
+`ActivationFunction{TN}(myactfunc)` be the same as the numerical type of `y`
+used in the construction of a data set.
 
 Some convenience functions are a part of the package:
 * `FourierActivation` - The complex exponential for type `ComplexF64`

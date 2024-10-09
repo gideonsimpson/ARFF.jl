@@ -4,8 +4,7 @@ The generalized fourier features model approximates functions with ``K`` feature
 f^\dagger(x) \approx f(x) = \sum_{k=1}^K \beta_k \varphi(x;\omega_k).
 ```
 In the above expression, ``x,\omega_k\in \mathbb{R}^d``, while
-``\beta_k\in\mathbb{R}^{d'}`` or ``\beta_k\in\mathbb{C}^{d'}``, depending on the choice of activation function.  Consequently, our model is uniquely determined by the
-coefficients and the wavenumbers.  
+``\beta_k\in\mathbb{R}^{d'}`` or ``\beta_k\in\mathbb{C}^{d'}``, depending on the choice of activation function.  Consequently, our model is uniquely determined by the coefficients, the wavenumbers, and the choice of activiation functions; see [`Activation Functions`]
 
 These are stored in either a scalar or vector valued data structure:
 ```@docs
@@ -15,7 +14,8 @@ ARFF.VectorFourierModel
 ## Constructing a Fourier Features Model
 A Fourier features model can be instantiated with:
 ```@docs
-    FourierModel
+    FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}) where {TB <: Number,TR <: AbstractFloat}
+    FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TB}}
 ```
 As an example, the scalar valued Fourier model with complex exponentials can be
 instantiated as:
@@ -32,7 +32,7 @@ F = FourierModel(randn(ComplexF64, K),  [randn(d) for _ in 1:K]);
 This defines `F` with random wavenumbers and amplitudes.  Strictly speaking,
 this is not required, but it is often helpful within the learning context that
 we will apply this method.  By not specifying an activation function, this
-defaults to `FourierActivation` function, ```e^{i \omega \cdot x}```, and presumes all ```y``` related values are of the same complex type.
+defaults to `FourierActivation` function, ``e^{i \omega \cdot x}``, and presumes all ``y`` related values are of the same complex type.
 
 
 Function evaluation has been overloaded for a `FourierModel`, allowing us to evaluate it at points:

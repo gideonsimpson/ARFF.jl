@@ -1,5 +1,5 @@
 """
-    ScalarFourierModel{TB<:Complex,TW<:AbstractArray{AbstractFloat}} 
+    ScalarFourierModel
 
 Structure containing a scalar valued fourier model which will be learned
 ### Fields
@@ -18,11 +18,11 @@ struct ScalarFourierModel{TR,TB,TI,TA} <: AbstractFourierModel where {TB<:Number
 end
 
 """
-    VectorFourierModel{TB<:Complex,TW<:AbstractArray{AbstractFloat}} 
+    VectorFourierModel
 
 Structure containing a scalar valued fourier model which will be learned
 ### Fields
-* `β` - 2D array of coefficients; K by dy in size
+* `β` - 2D array of coefficients; `K` by `dy` in size
 * `ω` - Array of wave vectors
 * `K` - Number of Fourier features
 * `dx` - Dimension of `x` coordinate
@@ -40,7 +40,7 @@ end
 """
     Base.length(F::TF) where {TF<:AbstractFourierModel}
 
-TBW
+Return the number of terms, `K`, of the Fourier model.
 """
 function Base.length(F::TF) where {TF<:AbstractFourierModel}
     return F.K
@@ -49,7 +49,8 @@ end
 """
     Base.size(F::TF) where {TF<:ScalarFourierModel}
 
-TBW
+Returns the tuple `(K, dx)` of the number of terms, `K`, and the dimension of
+the domain, `dx`, of a scalar valued Fourier model.
 """
 function Base.size(F::TF) where {TF<:ScalarFourierModel}
     return (F.K, F.dx)
@@ -58,7 +59,9 @@ end
 """
     Base.size(F::TF) where {TF<:VectorFourierModel}
 
-TBW
+Returns the tuple `(K, dx, dy)` of the number of terms, `K`, the dimension of
+the domain, `dx`, and the dimension of the range, `dy`, of a vector valued
+Fourier model.
 """
 function Base.size(F::TF) where {TF<:VectorFourierModel}
     return (F.K, F.dx, F.dy)
@@ -68,7 +71,7 @@ end
 """
     Base.isempty(F::TF) where {TF<:FourierModel}
 
-TBW
+Determine if the Fourier model is trivial (zero terms) or not. 
 """
 function Base.isempty(F::TF) where {TF<:AbstractFourierModel}
     return isempty(F.β)
@@ -77,7 +80,7 @@ end
 """
     Base.iterate(F::TF, state=1) where {TF<:ScalarFourierModel}
 
-TBW
+Iterate through the `(β, ω)` pairs characterizng the Fourier model
 """
 function Base.iterate(F::TF, state=1) where {TF<:ScalarFourierModel}
     if state > F.K
@@ -89,7 +92,7 @@ end
 """
     Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
 
-TBW
+Iterate through the `(β, ω)` pairs characterizng the Fourier model
 """
 function Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
     if state > F.K
@@ -99,9 +102,12 @@ function Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
 end
 
 """
-    FourierModel(β::Vector{TR}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
+    FourierModel(β, ω)
 
-TBW
+Constructor for a Fourier features model. Defaults to complex exponentials for activation functions.
+### Fields
+* `β` - Array of coefficients
+* `ω` - Array of wave numbers
 """
 function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}) where {TB <: Number,TR <: AbstractFloat}
     K = length(ω)
@@ -112,9 +118,14 @@ function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}) where {TB <: Numbe
 end
 
 """
-    FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TB}}
+    FourierModel(β, ω, ϕ) 
 
-TBW
+Constructor for a Fourier features model.
+### Fields
+* `β` - Array of coefficients
+* `ω` - Array of wave numbers
+* `ϕ` - Activation function of `ActivationFunction` type.  The data type of the
+  `β` must agree with the data type of the range of `ϕ`.
 """
 function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TB}}
     K = length(ω)
@@ -123,9 +134,12 @@ function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<
 end
 
 """
-    FourierModel(β::Vector{Vector{TR}}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
+    FourierModel(β, ω)
 
-TBW
+Constructor for a Fourier features model. Defaults to complex exponentials for activation functions.
+### Fields
+* `β` - Array of coefficients
+* `ω` - Array of wave numbers
 """
 function FourierModel(β::Matrix{TB}, ω::Vector{Vector{TR}}) where {TB<:Number,TR<:AbstractFloat}
     K = length(ω)
@@ -138,9 +152,14 @@ end
 
 
 """
-    FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
+    FourierModel(β, ω, ϕ) 
 
-TBW
+Constructor for a Fourier features model.
+### Fields
+* `β` - Array of coefficients
+* `ω` - Array of wave numbers
+* `ϕ` - Activation function of `ActivationFunction` type.  The data type of the
+  `β` must agree with the data type of the range of `ϕ`.
 """
 function FourierModel(β::Matrix{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
     K = length(ω)
@@ -152,9 +171,13 @@ end
 
 
 """
-    FourierModel(β::Vector{Vector{TR}}, ω::Vector{Vector{TR}}) where {TR<:AbstractFloat}
+    FourierModel(β, ω) 
 
-TBW
+Constructor for a `VectorFourierModel`. Defaults to complex exponentials for
+activation functions.
+### Fields
+* `β` - Array of coefficients
+* `ω` - Array of wave numbers
 """
 function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}) where {TB <: Number, TR <: AbstractFloat}
     K = length(ω)
@@ -171,9 +194,15 @@ function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}) where {TB 
 end
 
 """
-    FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
+    FourierModel(β, ω, ϕ) 
 
-TBW
+Constructor for a `VectorFourierModel`. Defaults to complex exponentials for
+activation functions.
+### Fields
+* `β` - Array of coefficients 
+* `ω` - Array of wave numbers 
+* `ϕ` - Activation function of `ActivationFunction` type.  The data type of the
+  `β` must agree with the data type of the range of `ϕ`.
 """
 function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
     K = length(ω)
@@ -187,33 +216,4 @@ function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) wh
 
 
     return VectorFourierModel(β_, ω, K, dx, dy, ϕ)
-end
-
-"""
-    copy_from_transpose!(F::VectorFourierModel)
-
-TBW
-"""
-function copy_from_transpose!(F::VectorFourierModel)
-    for d_ in 1:F.dy
-        for k in 1:F.K
-            F.β[k][d_] = F.βt[d_][k]
-        end
-    end
-    F
-end
-
-
-"""
-    copy_to_transpose!(F::VectorFourierModel)
-
-TBW
-"""
-function copy_to_transpose!(F::VectorFourierModel)
-    for d_ in 1:F.dy
-        for k in 1:F.K
-            F.βt[d_][k] = F.β[k][d_]
-        end
-    end
-    F
 end
