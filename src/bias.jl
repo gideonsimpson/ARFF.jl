@@ -7,7 +7,7 @@ coordinate.
 * `data` - data set to be augmented
 """
 function append_bias(data::ScalarDataSet{TR,TY,TI}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
-    return ScalarDataSet([[x_; one(TR)] for x_ in data.x], data.y, data.N, data.dx + 1)
+    return ScalarDataSet([[deepcopy(x_); one(TR)] for x_ in data.x], deepcopy(data.y), data.N, data.dx + 1)
 end
 
 """
@@ -19,7 +19,7 @@ coordinate.
 * `data` - data set to be augmented
 """
 function append_bias(data::VectorDataSet{TR,TY,TI}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
-    return VectorDataSet([[x_; one(TR)] for x_ in data.x], data.y, data.N, data.dx + 1)
+    return VectorDataSet([[deepcopy(x_); one(TR)] for x_ in data.x], deepcopy(data.y), data.N, data.dx + 1, data.dy)
 end
 
 """
@@ -31,7 +31,7 @@ the `x` coordinate.
 * `scalings` - scalings to be augmented
 """
 function append_bias(scalings::ScalarDataScalings{TR,TY}) where {TY<:Number,TR<:AbstractFloat}
-    return ScalarDataScalings([scalings.μx; zero(TR)], [scalings.σ2x; one(TR)], scalings.μy, scalings.σ2y)
+    return ScalarDataScalings([deepcopy(scalings.μx); zero(TR)], [deepcopy(scalings.σ2x); one(TR)], scalings.μy, scalings.σ2y)
 end
 
 
@@ -44,6 +44,6 @@ the `x` coordinate.
 * `scalings` - scalings to be augmented
 """
 function append_bias(scalings::VectorDataScalings{TR,TY}) where {TY<:Number,TR<:AbstractFloat}
-    return VectorDataScalings([scalings.μx; zero(TR)], [scalings.σ2x; one(TR)], scalings.μy, scalings.σ2y)
+    return VectorDataScalings([deepcopy(scalings.μx); zero(TR)], [deepcopy(scalings.σ2x); one(TR)], deepcopy(scalings.μy), deepcopy(scalings.σ2y))
 end
 
