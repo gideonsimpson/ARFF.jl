@@ -15,6 +15,7 @@ struct ScalarDataSet{TR,TB,TI} <: AbstractDataSet where {TR<:AbstractFloat, TB<:
     y::Vector{TB}
     N::TI
     dx::TI
+    dy::TI
 end
 
 
@@ -26,7 +27,7 @@ arrays of y values.
 ### Fields
 * `x` - Array of real valued vectors 
 * `y` - Array of complex valued vectors
-* `yt` - Tranposed array of complex valued vectors
+* `y_mat` - `y` represented as a matrix
 * `N` - Number of data points
 * `dx` - Dimension of `x` coordinates
 * `dy` - Dimension of `y` coordinates
@@ -34,7 +35,7 @@ arrays of y values.
 struct VectorDataSet{TR,TY,TI} <: AbstractDataSet where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
     x::Vector{Vector{TR}}
     y::Vector{Vector{TY}}
-    yt::Vector{Vector{TY}}
+    y_mat::Matrix{TY}
     N::TI
     dx::TI
     dy::TI
@@ -85,25 +86,25 @@ end
 
 Iterate through the `(xᵢ, yᵢ)` pairs in the data set.
 """
-function Base.iterate(D::TD, state=1) where {TD<:ScalarDataSet}
+function Base.iterate(D::TD, state=1) where {TD<:AbstractDataSet}
     if state > D.N
         return nothing
     end
-    return (D.x[state], D.y[state]), state + 1
+    return (D.x[state], D.y[state,:]), state + 1
 end
 
 
-"""
-    Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
+# """
+#     Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
 
-Iterate through the `(xᵢ, yᵢ)` pairs in the data set.
-"""
-function Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
-    if state > D.N
-        return nothing
-    end
-    return (D.x[state], [D.yt[state]]), state + 1
-end
+# Iterate through the `(xᵢ, yᵢ)` pairs in the data set.
+# """
+# function Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
+#     if state > D.N
+#         return nothing
+#     end
+#     return (D.x[state], [D.y[state,:]]), state + 1
+# end
 
 
 """
@@ -117,7 +118,7 @@ Constructor for a `ScalarDataSet`
 function DataSet(x::Vector{Vector{TR}}, y::Vector{TY}) where {TR<:AbstractFloat,TY<:Number}
     N = length(x);
     dx = length(x[1]);
-    return ScalarDataSet(deepcopy(x), deepcopy(y), N, dx)
+    return ScalarDataSet(deepcopy(x), deepcopy(y), N, dx, 1)
 end
 
 
@@ -133,6 +134,6 @@ function DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TY<:Number
     N = length(x)
     dx = length(x[1])
     dy = length(y[1])
-    return VectorDataSet(deepcopy(x), deepcopy(y), deepcopy([[y_[i] for y_ in y] for i = 1:dy]), N, dx, dy)
+    return VectorDataSet(deepcopy(x), deepcopy(y), deepcopy(hcat(y...)'), N, dx, dy)
 end
 

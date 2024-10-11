@@ -14,6 +14,7 @@ struct ScalarFourierModel{TR,TB,TI,TA} <: AbstractFourierModel where {TB<:Number
     ω::Vector{Vector{TR}}
     K::TI
     dx::TI
+    dy::TI
     ϕ::TA
 end
 
@@ -46,15 +47,15 @@ function Base.length(F::TF) where {TF<:AbstractFourierModel}
     return F.K
 end
 
-"""
-    Base.size(F::TF) where {TF<:ScalarFourierModel}
+# """
+#     Base.size(F::TF) where {TF<:ScalarFourierModel}
 
-Returns the tuple `(K, dx)` of the number of terms, `K`, and the dimension of
-the domain, `dx`, of a scalar valued Fourier model.
-"""
-function Base.size(F::TF) where {TF<:ScalarFourierModel}
-    return (F.K, F.dx)
-end
+# Returns the tuple `(K, dx)` of the number of terms, `K`, and the dimension of
+# the domain, `dx`, of a scalar valued Fourier model.
+# """
+# function Base.size(F::TF) where {TF<:ScalarFourierModel}
+#     return (F.K, F.dx)
+# end
 
 """
     Base.size(F::TF) where {TF<:VectorFourierModel}
@@ -63,7 +64,7 @@ Returns the tuple `(K, dx, dy)` of the number of terms, `K`, the dimension of
 the domain, `dx`, and the dimension of the range, `dy`, of a vector valued
 Fourier model.
 """
-function Base.size(F::TF) where {TF<:VectorFourierModel}
+function Base.size(F::TF) where {TF<:AbstractFourierModel}
     return (F.K, F.dx, F.dy)
 end
 
@@ -112,9 +113,11 @@ Constructor for a Fourier features model. Defaults to complex exponentials for a
 function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}) where {TB <: Number,TR <: AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
+    dy = 1;
     TC = typeof(complex(β[1]))
 
-    return ScalarFourierModel(complex.(β), ω, K, dx, ActivationFunction{TC}(fourier))
+
+    return ScalarFourierModel(complex.(β), ω, K, dx, dy,  ActivationFunction{TC}(fourier))
 end
 
 """
@@ -130,7 +133,8 @@ Constructor for a Fourier features model.
 function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TB}}
     K = length(ω)
     dx = length(ω[1])
-    return ScalarFourierModel(β, ω, K, dx, ϕ)
+    dy = 1;
+    return ScalarFourierModel(β, ω, K, dx, dy,  ϕ)
 end
 
 """
