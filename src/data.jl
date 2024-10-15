@@ -14,7 +14,7 @@ arrays of y values.
 struct ScalarDataSet{TR,TY,TI} <: AbstractDataSet where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
     x::Vector{Vector{TR}}
     y::Vector{TY}
-    y_mat::Matrix{TY}
+    y_mat::Vector{TY}
     N::TI
     dx::TI
     dy::TI
@@ -117,10 +117,10 @@ Constructor for a `ScalarDataSet`
 * `x` - Array of real valued vectors 
 * `y` - Array of scalars
 """
-function DataSet(x::Vector{Vector{TR}}, y::Vector{TY}) where {TR<:AbstractFloat,TY<:Number}
+function DataSet(x::AbstractVector{Vector{TR}}, y::AbstractVector{TY}) where {TR<:AbstractFloat,TY<:Number}
     N = length(x);
     dx = length(x[1]);
-    return ScalarDataSet(deepcopy(x), deepcopy(y), deepcopy(y[:,:]), N, dx, 1)
+    return ScalarDataSet(deepcopy(x), deepcopy(y), deepcopy(y), N, dx, 1)
 end
 
 
@@ -132,7 +132,7 @@ Constructor for a `VectorDataSet`
 * `x` - Array of real valued vectors 
 * `y` - Array of vectors
 """
-function DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TR <: AbstractFloat, TY <: Number}
+function DataSet(x::AbstractVector{Vector{TR}}, y::AbstractVector{Vector{TY}}) where {TR<:AbstractFloat,TY<:Number}
     N = length(x)
     dx = length(x[1])
     dy = length(y[1])

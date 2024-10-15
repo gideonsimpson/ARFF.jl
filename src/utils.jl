@@ -11,21 +11,31 @@ function optimal_γ(d::Integer)
 end
 
 function subsample(a::AbstractVector, rows::TI) where {TI<:Integer}
-    return a[rows]
+    return a[rows];
 
 end
 
-function subsample(a::TA, rows::AbstractVector{TI}) where {TA<:AbstractVector, TI<:Integer}
+function subsample(a::AbstractVector, rows::AbstractVector{TI}) where {TI<:Integer}
     return @view a[rows];
 
 end
 
 function subsample(a::AbstractMatrix, rows::TI) where {TI<:Integer}
-    return @view a[rows, :]
+    return @view a[rows, :];
 
 end
 
 function subsample(a::AbstractMatrix, rows::AbstractVector{TI}) where {TI<:Integer}
-    return @view a[rows,:]
+    return @view a[rows,:];
+
+end
+
+function copy_entries!(a::AbstractVector, b::AbstractVector, rows::TI) where {TI<:Integer}
+    a[rows] = b[rows];
+
+end
+
+function copy_entries!(a::AbstractMatrix, b::AbstractMatrix, rows::TI) where {TI<:Integer}
+    @. a[rows,:] = b[rows,:];
 
 end

@@ -4,8 +4,8 @@
 
 Assemble the design matrix using the current ω values and x measurement positions with defined features function.
 """
-function assemble_matrix!(S::Matrix{TB}, ϕ::ActivationFunction{TB}, 
-    x_data::AbstractVector{TX}, ω_vals::Vector{Vector{TF}}) where {TB<:Number,TF<:AbstractFloat,TX<:AbstractVector{TF}}
+function assemble_matrix!(S::Matrix{TY}, ϕ::ActivationFunction{TY}, 
+    x_data::AbstractVector{TX}, ω_vals::AbstractVector{TX}) where {TY<:Number,TF<:AbstractFloat,TX<:AbstractVector{TF}}
     N = length(x_data)
     K = length(ω_vals)
 
