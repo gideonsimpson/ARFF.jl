@@ -4,5 +4,5 @@ let
     f(x) = [x[1], x[1]^2]
     y = f.(x)
     data = DataSet(x, y)
-    data.yt[2][end] ≈ 100
+    data.y_mat[end, 2] ≈ 100
 end

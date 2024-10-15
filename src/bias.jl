@@ -7,7 +7,7 @@ coordinate.
 * `data` - data set to be augmented
 """
 function append_bias(data::ScalarDataSet{TR,TY,TI}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
-    return ScalarDataSet([[deepcopy(x_); one(TR)] for x_ in data.x], deepcopy(data.y), data.N, data.dx + 1)
+    return ScalarDataSet([[deepcopy(x_); one(TR)] for x_ in data.x], deepcopy(data.y), deepcopy(data.y_mat), data.N, data.dx + 1, data.dy)
 end
 
 """
@@ -19,7 +19,7 @@ coordinate.
 * `data` - data set to be augmented
 """
 function append_bias(data::VectorDataSet{TR,TY,TI}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
-    return VectorDataSet([[deepcopy(x_); one(TR)] for x_ in data.x], deepcopy(data.y), data.N, data.dx + 1, data.dy)
+    return VectorDataSet([[deepcopy(x_); one(TR)] for x_ in data.x], deepcopy(data.y), deepcopy(data.y_mat), data.N, data.dx + 1, data.dy)
 end
 
 """

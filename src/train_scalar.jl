@@ -137,11 +137,19 @@ end
 * `record_loss=true` - Evaluate the specified loss function at each epoch and
   record
 """
-function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,TB,TI}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer, TA<:ActivationFunction{TB}}
-    N = length(data);
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, Iterators.cycle([data]), N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
-    return Σ_mean, acceptance_rate, loss
+# function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,TB,TI}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer, TA<:ActivationFunction{TB}}
+#     N = length(data);
+#     Σ_mean, acceptance_rate, loss = train_rwm!(F, Iterators.cycle([data]), N, N, Σ, options; show_progress=show_progress, record_loss=record_loss)
+#     return Σ_mean, acceptance_rate, loss
+# end
+
+function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data::ScalarDataSet{TR,TB,TI}, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+  N = length(data);
+  solver = ARFFSolver(options.linear_solve!);
+  Σ_mean, acceptance_rate, loss = train_arff!(F, Iterators.cycle([data]), N, Σ, solver, options, show_progress=show_progress, record_loss=record_loss)
+  return Σ_mean, acceptance_rate, loss
 end
+
 
 """
     train_rwm!(F, data, batch_size, Σ, options; show_progress=true, record_loss=true)

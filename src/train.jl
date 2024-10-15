@@ -1,20 +1,26 @@
-function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets, N::TI, batch_size::TI, Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+"""
+    train_arff!(F, data_sets, batch_size::Integer, Σ, solver::ARFFSolver, options::ARFFOptions; show_progress=true, record_loss=true)
+
+TBW
+"""
+function train_arff!(F::TF, data_sets::TD, batch_size::TI, Σ, solver::ARFFSolver, options::ARFFOptions; show_progress=true, record_loss=true) where {TF, TD, TI<:Integer}
 
     # extract values
     K = length(F)
     _, dx, dy = size(F);
+    N = length(Iterators.first(data_sets));
 
     # initialize data structures
     β_proposal = similar(F.β)
     ω_proposal = similar(F.ω)
-    S = zeros(TB, batch_size, K)
+    S = zeros(typeof(F.β[1,1]), batch_size, K)
 
     # instantaneous ensemble averages
-    ω_mean_ = zeros(d)
-    Σ_mean_ = zeros(d, d)
+    ω_mean_ = zeros(dx)
+    Σ_mean_ = zeros(dx, dx)
 
     # cumulative averages 
-    ω_mean = zeros(d)
+    ω_mean = zeros(dx)
     Σ_mean = deepcopy(Σ)
 
     # initialize RWM distribution
@@ -29,8 +35,9 @@ function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets, N::TI, batch_
     if (batch_size < N)
         rows = sample(1:N, batch_size, replace=false)
     end
-    assemble_matrix!(S, F.ϕ, Iterators.first(data_sets).x[rows], F.ω)
-    options.linear_solve!(F.β, S, Iterators.first(data_sets).y[rows], F.ω)
+    # assemble_matrix!(S, F.ϕ, Iterators.first(data_sets).x[rows], F.ω)
+    assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x,rows), F.ω)
+    solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y_mat, rows), F.ω)
 
     p = Progress(options.n_epochs; enabled=show_progress)
 
@@ -49,15 +56,16 @@ function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets, N::TI, batch_
             # generate proposal
 
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
-            assemble_matrix!(S, F.ϕ, data.x[rows], ω_proposal)
-            options.linear_solve!(β_proposal, S, data.y[rows,:], ω_proposal)
+            # assemble_matrix!(S, F.ϕ, data.x[rows], ω_proposal)
+            assemble_matrix!(S, F.ϕ, subsample(data.x, rows), ω_proposal)
+            solver.linear_solve!(β_proposal, S, subsample(data.y_mat, rows), ω_proposal)
 
             # apply Metroplis step
             for k in 1:K
                 ζ = rand()
-                if ((abs(β_proposal[k]) / abs(F.β[k]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                if ((norm(β_proposal[k, :]) / norm(F.β[k, :]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
                     @. F.ω[k] = ω_proposal[k]
-                    F.β[k] = β_proposal[k]
+                    @. F.β[k, :] = β_proposal[k, :]
                     accept_ += 1.0 / (K * options.n_ω_steps)
                 end
             end
@@ -83,12 +91,13 @@ function train_rwm!(F::ScalarFourierModel{TR,TB,TI,TA}, data_sets, N::TI, batch_
         end
 
         # perform full β update
-        assemble_matrix!(S, F.ϕ, data.x[rows], F.ω)
-        options.linear_solve!(F.β, S, data.y[rows,:], F.ω)
+        # assemble_matrix!(S, F.ϕ, data.x[rows], ω_proposal)
+        assemble_matrix!(S, F.ϕ, subsample(data.x,rows), F.ω)
+        solver.linear_solve!(F.β, S, subsample(data.y_mat, rows), F.ω)
 
         # record loss
         if record_loss
-            loss_ = options.loss(F, data.x[rows], data.y[rows,:])
+            loss_ = options.loss(F, subsample(data.x,rows), subsample(data.y,rows))
             push!(loss, loss_)
         end
 

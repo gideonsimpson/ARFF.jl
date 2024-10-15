@@ -7,12 +7,14 @@ arrays of y values.
 ### Fields
 * `x` - Array of real valued vectors 
 * `y` - Array of complex scalars
+* `y_mat` - `y` represented as a matrix
 * `N` - Number of data points
 * `dx` - Dimension of `x` coordinates
 """
-struct ScalarDataSet{TR,TB,TI} <: AbstractDataSet where {TR<:AbstractFloat, TB<:Number,  TI<:Integer}
+struct ScalarDataSet{TR,TY,TI} <: AbstractDataSet where {TY<:Number,TR<:AbstractFloat,TI<:Integer}
     x::Vector{Vector{TR}}
-    y::Vector{TB}
+    y::Vector{TY}
+    y_mat::Matrix{TY}
     N::TI
     dx::TI
     dy::TI
@@ -60,15 +62,15 @@ function Base.isempty(D::TD) where {TD<:AbstractDataSet}
 end
 
 
-"""
-    Base.size(D::TD) where {TD<:ScalarDataSet}
+# """
+#     Base.size(D::TD) where {TD<:ScalarDataSet}
 
-Returns the tuple `(N, dx)` of the number of samples, `N`, and the dimension of
-the domain, `dx`, of a `ScalarDataSet`.
-"""
-function Base.size(D::TD) where {TD<:ScalarDataSet}
-    return (D.N, D.dx)
-end
+# Returns the tuple `(N, dx)` of the number of samples, `N`, and the dimension of
+# the domain, `dx`, of a `ScalarDataSet`.
+# """
+# function Base.size(D::TD) where {TD<:ScalarDataSet}
+#     return (D.N, D.dx)
+# end
 
 """
     Base.size(D::TD) where {TD<:VectorDataSet}
@@ -76,7 +78,7 @@ end
 Returns the tuple `(N, dx, dy)` of the number of samples, `N`, the dimension of
 the domain, `dx`, and the dimension of the range, `dy`, of a `VectorDataSet`.
 """
-function Base.size(D::TD) where {TD<:VectorDataSet}
+function Base.size(D::TD) where {TD<:AbstractDataSet}
     return (D.N, D.dx, D.dy)
 end
 
@@ -118,7 +120,7 @@ Constructor for a `ScalarDataSet`
 function DataSet(x::Vector{Vector{TR}}, y::Vector{TY}) where {TR<:AbstractFloat,TY<:Number}
     N = length(x);
     dx = length(x[1]);
-    return ScalarDataSet(deepcopy(x), deepcopy(y), N, dx, 1)
+    return ScalarDataSet(deepcopy(x), deepcopy(y), deepcopy(y[:,:]), N, dx, 1)
 end
 
 
@@ -130,10 +132,10 @@ Constructor for a `VectorDataSet`
 * `x` - Array of real valued vectors 
 * `y` - Array of vectors
 """
-function DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TY<:Number, TR<:AbstractFloat}
+function DataSet(x::Vector{Vector{TR}}, y::Vector{Vector{TY}}) where {TR <: AbstractFloat, TY <: Number}
     N = length(x)
     dx = length(x[1])
     dy = length(y[1])
-    return VectorDataSet(deepcopy(x), deepcopy(y), deepcopy(hcat(y...)'), N, dx, dy)
+    return VectorDataSet(deepcopy(x), deepcopy(y), deepcopy(Matrix(hcat(y...)')), N, dx, dy)
 end
 

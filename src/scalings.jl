@@ -82,6 +82,7 @@ function scale_data!(data::ScalarDataSet{TR,TY,TI}, scalings::ScalarDataScalings
     for i in 1:data.N
         @. data.x[i] = (data.x[i] - scalings.μx) / sqrt(scalings.σ2x)
         data.y[i] = (data.y[i] - scalings.μy) / sqrt(scalings.σ2y)
+        @. data.y_mat[i, :] = (data.y_mat[i, :] - scalings.μy) / sqrt(scalings.σ2y)
     end
 
     data
@@ -122,6 +123,7 @@ function rescale_data!(data::ScalarDataSet{TR,TY,TI}, scalings::ScalarDataScalin
     for i in 1:data.N
         @. data.x[i] = scalings.μx + sqrt(scalings.σ2x) * data.x[i]
         data.y[i] = scalings.μy + sqrt(scalings.σ2y) * data.y[i]
+        @. data.y_mat[i, :] = scalings.μy + sqrt(scalings.σ2y) * data.y_mat[i, :]
     end
 
     data
