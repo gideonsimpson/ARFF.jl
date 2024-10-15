@@ -9,6 +9,7 @@ using ProgressMeter
 include("types.jl")
 include("activations.jl")
 include("fourier.jl")
+include("rwm.jl")
 include("data.jl")
 include("scalings.jl")
 include("bias.jl")

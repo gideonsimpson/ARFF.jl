@@ -3,7 +3,7 @@
 
 TBW
 """
-function train_arff!(F::TF, data_sets::TD, batch_size::TI, Σ, solver::ARFFSolver, options::ARFFOptions; show_progress=true, record_loss=true) where {TF, TD, TI<:Integer}
+function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, Σ, solver::ARFFSolver, options::ARFFOptions; show_progress=true, record_loss=true) where {TD,TI<:Integer}
 
     # extract values
     K = length(F)
@@ -37,7 +37,7 @@ function train_arff!(F::TF, data_sets::TD, batch_size::TI, Σ, solver::ARFFSolve
     end
     # assemble_matrix!(S, F.ϕ, Iterators.first(data_sets).x[rows], F.ω)
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x,rows), F.ω)
-    solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y_mat, rows), F.ω)
+    solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y, rows), F.ω)
 
     p = Progress(options.n_epochs; enabled=show_progress)
 
@@ -58,14 +58,16 @@ function train_arff!(F::TF, data_sets::TD, batch_size::TI, Σ, solver::ARFFSolve
             @. ω_proposal = F.ω + options.δ * rand((mv_normal,))
             # assemble_matrix!(S, F.ϕ, data.x[rows], ω_proposal)
             assemble_matrix!(S, F.ϕ, subsample(data.x, rows), ω_proposal)
-            solver.linear_solve!(β_proposal, S, subsample(data.y_mat, rows), ω_proposal)
+            solver.linear_solve!(β_proposal, S, subsample(data.y, rows), ω_proposal)
 
             # apply Metroplis step
             for k in 1:K
                 ζ = rand()
-                if ((norm(β_proposal[k, :]) / norm(F.β[k, :]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                # if ((norm(β_proposal[k, :]) / norm(F.β[k, :]))^options.γ > ζ) && (norm(ω_proposal[k]) < options.ω_max)
+                if (likelihood(subsample(β_proposal,k), subsample(F.β,k), options.γ) > ζ) && (norm(ω_proposal[k]) < options.ω_max)
                     @. F.ω[k] = ω_proposal[k]
-                    @. F.β[k, :] = β_proposal[k, :]
+                    # @. F.β[k, :] = β_proposal[k, :]
+                    F.β[k] = β_proposal[k]
                     accept_ += 1.0 / (K * options.n_ω_steps)
                 end
             end
@@ -93,7 +95,7 @@ function train_arff!(F::TF, data_sets::TD, batch_size::TI, Σ, solver::ARFFSolve
         # perform full β update
         # assemble_matrix!(S, F.ϕ, data.x[rows], ω_proposal)
         assemble_matrix!(S, F.ϕ, subsample(data.x,rows), F.ω)
-        solver.linear_solve!(F.β, S, subsample(data.y_mat, rows), F.ω)
+        solver.linear_solve!(F.β, S, subsample(data.y, rows), F.ω)
 
         # record loss
         if record_loss

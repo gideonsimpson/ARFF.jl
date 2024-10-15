@@ -10,7 +10,8 @@ Structure containing a scalar valued fourier model which will be learned
 * `ϕ` - Activation function
 """
 struct ScalarFourierModel{TR,TY,TI,TA} <: AbstractFourierModel where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
-    β::Matrix{TY}
+    # β::Matrix{TY}
+    β::Vector{TY}
     ω::Vector{Vector{TR}}
     K::TI
     dx::TI
@@ -78,24 +79,25 @@ function Base.isempty(F::TF) where {TF<:AbstractFourierModel}
     return isempty(F.β)
 end
 
-# """
-#     Base.iterate(F::TF, state=1) where {TF<:ScalarFourierModel}
+"""
+    Base.iterate(F::TF, state=1) where {TF<:ScalarFourierModel}
 
-# Iterate through the `(β, ω)` pairs characterizng the Fourier model
-# """
-# function Base.iterate(F::TF, state=1) where {TF<:ScalarFourierModel}
-#     if state > F.K
-#         return nothing
-#     end
-#     return (F.β[state,], F.ω[state]), state + 1
-# end
+Iterate through the `(β, ω)` pairs characterizng the Fourier model
+"""
+function Base.iterate(F::TF, state=1) where {TF<:ScalarFourierModel}
+    if state > F.K
+        return nothing
+    end
+    return (F.β[state], F.ω[state]), state + 1
+end
 
 """
     Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
 
 Iterate through the `(β, ω)` pairs characterizng the Fourier model
 """
-function Base.iterate(F::TF, state=1) where {TF<:AbstractFourierModel}
+# function Base.iterate(F::TF, state=1) where {TF<:AbstractFourierModel}
+function Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
     if state > F.K
         return nothing
     end
@@ -110,12 +112,19 @@ Constructor for a Fourier features model. Defaults to complex exponentials for a
 * `β` - Array of coefficients
 * `ω` - Array of wave numbers
 """
-function FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}) where {TY <: Number,TR <: AbstractFloat}
+# function FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}) where {TY <: Number,TR <: AbstractFloat}
+#     K = length(ω)
+#     dx = length(ω[1])
+#     dy = 1;
+#     TC = typeof(complex(β[1]))
+#     return ScalarFourierModel(complex.(β[:,:]), ω, K, dx, dy,  ActivationFunction{TC}(fourier))
+# end
+function FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}) where {TY<:Number,TR<:AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
-    dy = 1;
+    dy = 1
     TC = typeof(complex(β[1]))
-    return ScalarFourierModel(complex.(β[:,:]), ω, K, dx, dy,  ActivationFunction{TC}(fourier))
+    return ScalarFourierModel(complex.(β), ω, K, dx, dy, ActivationFunction{TC}(fourier))
 end
 
 """
@@ -128,11 +137,17 @@ Constructor for a Fourier features model.
 * `ϕ` - Activation function of `ActivationFunction` type.  The data type of the
   `β` must agree with the data type of the range of `ϕ`.
 """
+# function FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}, ϕ::TA) where {TY<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TY}}
+#     K = length(ω)
+#     dx = length(ω[1])
+#     dy = 1;
+#     return ScalarFourierModel(β[:,:], ω, K, dx, dy, ϕ)
+# end
 function FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}, ϕ::TA) where {TY<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TY}}
     K = length(ω)
     dx = length(ω[1])
-    dy = 1;
-    return ScalarFourierModel(β[:,:], ω, K, dx, dy, ϕ)
+    dy = 1
+    return ScalarFourierModel(complex.(β), ω, K, dx, dy, ϕ)
 end
 
 """
