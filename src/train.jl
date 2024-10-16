@@ -109,7 +109,7 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, Σ,
 end
 
 """
-    train_arff!(F, data_sets, batch_size::Integer, Σ, solver::ARFFSolver, options::ARFFOptions; show_progress=true, record_loss=true)
+    train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, Σ, solver::ARFFSolver, options::ARFFOptions; show_progress=true, record_loss=true) where {TD,TI<:Integer}
 
 TBW
 """
