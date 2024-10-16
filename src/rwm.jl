@@ -1,4 +1,4 @@
-struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:AbstractVecOrMat}
+struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:AbstractVecOrMat} <: AbstractRWMSampler
     linear_solve!::TS
     n_rwm_steps::TI
     n_burn::TI
@@ -13,7 +13,8 @@ struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:Abs
     mv_normal::TMN
 end
 
-function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where{TF<:AbstractFourierModel, TS, TI, TM, TR}
+function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI,TM,TR}
+    <:AbstractRWMSampler
     β_proposal = similar(F.β)
     ω_proposal = similar(F.ω)
     return RWMSampler(linear_solve!, n_rwm_steps,n_burn, n_epochs, deepcopy(β_proposal), deepcopy(ω_proposal), deepcopy(Σ), γ, δ, zeros(n_epochs), ω_max, MvNormal(Σ))

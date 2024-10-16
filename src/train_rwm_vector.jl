@@ -1,4 +1,11 @@
-function train_rwm2!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI},
+"""
+    train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI},
+    Σ::Matrix{TR}, options::ARFFOptions;
+    show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+
+TBW
+"""
+function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI},
     Σ::Matrix{TR}, options::ARFFOptions;
     show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     N = length(data)
