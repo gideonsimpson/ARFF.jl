@@ -7,7 +7,6 @@ corresponds to the Fourier feature model.
 function (F::ScalarFourierModel{TR,TY,TI,TA})(x::Vector{TR}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
     y = zero(TY)
     for (β, ω) in F
-        # y += β[1] * F.ϕ(x, ω)
         y += β * F.ϕ(x, ω)
     end
     return y
@@ -42,7 +41,7 @@ function (F::ScalarFourierModel{TR,TY,TI,TA})(x::Vector{TR}, scalings::ScalarDat
     y = zero(TY)
     x_scaled = (x - scalings.μx) ./ sqrt.(scalings.σ2x)
     for (β, ω) in F
-        y += β[1] * F.ϕ(x_scaled, ω)
+        y += β * F.ϕ(x_scaled, ω)
     end
 
     y *= sqrt(scalings.σ2y)

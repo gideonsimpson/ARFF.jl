@@ -62,15 +62,6 @@ function Base.isempty(D::TD) where {TD<:AbstractDataSet}
 end
 
 
-# """
-#     Base.size(D::TD) where {TD<:ScalarDataSet}
-
-# Returns the tuple `(N, dx)` of the number of samples, `N`, and the dimension of
-# the domain, `dx`, of a `ScalarDataSet`.
-# """
-# function Base.size(D::TD) where {TD<:ScalarDataSet}
-#     return (D.N, D.dx)
-# end
 
 """
     Base.size(D::TD) where {TD<:VectorDataSet}
@@ -88,25 +79,25 @@ end
 
 Iterate through the `(xᵢ, yᵢ)` pairs in the data set.
 """
-function Base.iterate(D::TD, state=1) where {TD<:AbstractDataSet}
+function Base.iterate(D::TD, state=1) where {TD<:ScalarDataSet}
     if state > D.N
         return nothing
     end
-    return (D.x[state], D.y[state,:]), state + 1
+    return (D.x[state], D.y[state]), state + 1
 end
 
 
-# """
-#     Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
+"""
+    Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
 
-# Iterate through the `(xᵢ, yᵢ)` pairs in the data set.
-# """
-# function Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
-#     if state > D.N
-#         return nothing
-#     end
-#     return (D.x[state], [D.y[state,:]]), state + 1
-# end
+Iterate through the `(xᵢ, yᵢ)` pairs in the data set.
+"""
+function Base.iterate(D::TD, state=1) where {TD<:VectorDataSet}
+    if state > D.N
+        return nothing
+    end
+    return (D.x[state], [D.y[state,:]]), state + 1
+end
 
 
 """

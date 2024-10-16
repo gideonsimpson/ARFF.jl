@@ -11,7 +11,7 @@ let
     K = 2^6
     Random.seed!(200)
     d = 2
-    F = FourierModel([1.0 * randn(d) for _ in 1:K], [1.0 * randn(d) for _ in 1:K])
+    F0 = FourierModel([1.0 * randn(d) for _ in 1:K], [1.0 * randn(d) for _ in 1:K])
 
 
     d = 2
@@ -25,12 +25,21 @@ let
     ω_max = Inf
     adapt_covariance = true
 
-    β_solver! = (β, S, y, ω) -> solve_normal!(β, S, y)
+    β_ = similar(F0.β[:, 1])
+
+    function component_solver!(β, S, y, ω)
+        for d_ in 1:d
+            solve_normal!(β_, S, @view(y[:, d_]))
+            @. β[:, d_] = β_
+        end
+        β
+    end
 
     opts = ARFFOptions(n_epochs, n_ω_steps, δ, n_burn, γ, ω_max,
-        adapt_covariance, β_solver!, ARFF.mse_loss)
+        adapt_covariance, component_solver!, ARFF.mse_loss)
 
     Random.seed!(1000)
+    F = deepcopy(F0)
     Σ_mean, acceptance_rate, loss = train_rwm!(F, data, Σ0, opts, show_progress=false);
 
     norm(F([1.0, 1.0]) - [1.0, 0.0]) < 1e-2
