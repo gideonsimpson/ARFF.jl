@@ -17,7 +17,7 @@ function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,T
     Σ::Matrix{TR}, options::ARFFOptions;
     show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     N = length(data)
-    solver = ARFFSolver(options.linear_solve!)
+    solver = ARFFSolver(options.linear_solve!, trivial_mutate!, trivial_resample!)
     Σ_mean, acceptance_rate, loss = train_arff!(F, Iterators.cycle([data]), N, Σ, solver, options, show_progress=show_progress, record_loss=record_loss)
     return Σ_mean, acceptance_rate, loss
 end
@@ -43,7 +43,7 @@ function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,T
     Σ::Matrix{TR}, options::ARFFOptions;
     show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
     N = length(data)
-    solver = ARFFSolver(options.linear_solve!)
+    solver = ARFFSolver(options.linear_solve!, trivial_mutate!, trivial_resample!)
     Σ_mean, acceptance_rate, loss = train_arff!(F, Iterators.cycle([data]), batch_size, Σ, solver, options, show_progress=show_progress, record_loss=record_loss)
     return Σ_mean, acceptance_rate, loss
 end
@@ -91,7 +91,7 @@ function train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR
     Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     N = length(data)
-    solver = ARFFSolver(options.linear_solve!)
+    solver = ARFFSolver(options.linear_solve!, trivial_mutate!, trivial_resample!)
     F_trajectory, Σ_mean, acceptance_rate, loss = train_arff(F₀, Iterators.cycle([data]), N, Σ, solver, options, show_progress=show_progress, record_loss=record_loss)
 
     return F_trajectory, Σ_mean, acceptance_rate, loss
@@ -115,7 +115,7 @@ strategy
 function train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI}, batch_size::TI,
     Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
-    solver = ARFFSolver(options.linear_solve!)
+    solver = ARFFSolver(options.linear_solve!, trivial_mutate!, trivial_resample!)
     F_trajectory, Σ_mean, acceptance_rate, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, Σ, solver, options, show_progress=show_progress, record_loss=record_loss)
 
     return F_trajectory, Σ_mean, acceptance_rate, loss
@@ -141,7 +141,7 @@ function train_rwm(F₀::VectorFourierModel{TR,TB,TI,TA}, data_sets::Vector{Vect
     Σ::Matrix{TR}, options::ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
 
     N = length(first(data_sets))
-    solver = ARFFSolver(options.linear_solve!)
+    solver = ARFFSolver(options.linear_solve!, trivial_mutate!, trivial_resample!)
     F_trajectory, Σ_mean, acceptance_rate, loss = train_arff(F₀, Iterators.cycle(data_sets), N, Σ, solver, options, show_progress=show_progress, record_loss=record_loss)
 
     return F_trajectory, Σ_mean, acceptance_rate, loss

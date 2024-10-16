@@ -1,10 +1,10 @@
-struct RWMSampler
+struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:AbstractVecOrMat}
     linear_solve!::TS
     n_rwm_steps::TI
     n_burn::TI
     n_epochs::TI
-    β_proposal::AbstractVector
-    ω_proposal::AbstractVector
+    β_proposal::TY
+    ω_proposal::TX
     Σ::TM
     γ::TI
     δ::TR
@@ -20,21 +20,28 @@ function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epo
 end
 
 
-struct AdaptiveRWMSampler
+
+struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<:AbstractVecOrMat}
     linear_solve!::TS
     n_rwm_steps::TI
     n_burn::TI
-    ω_proposal::AbstractVector
-    β_proposal::AbstractVector
+    n_epochs::TI
+    β_proposal::TY
+    ω_proposal::AbstractVector{TX}
     γ::TI
-    δ::TF
+    δ::TR
     acceptance_rate::AbstractVector
-    ω_max::TF
+    ω_max::TR
     ω_mean_::TX
     ω_mean::TX
     Σ_mean_::TM
     Σ_mean::TM
-    mv_normal
+    mv_normal::TMN
+end
+
+function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, Σ0::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI,TM,TR}
+    return AdaptiveRWMSampler(linear_solve!, n_rwm_steps, n_burn, n_epochs, deepcopy(F.β), deepcopy(F.ω),
+        γ, δ, zeros(n_epochs), ω_max, deepcopy(F.ω[1]), deepcopy(F.ω[1]), deepcopy(Σ0), deepcopy(Σ0), MvNormal(Σ0))
 end
 
 function likelihood(β_new::TY, β_old::TY, γ::TI) where {TY<:Number,TI<:Integer}
@@ -57,15 +64,15 @@ function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFou
         # generate proposal
 
         @. sampler.ω_proposal = F.ω + sampler.δ * rand((sampler.mv_normal,))
-        assemble_matrix!(S, F.ϕ, x, ω_proposal)
+        assemble_matrix!(S, F.ϕ, x, sampler.ω_proposal)
         sampler.linear_solve!(sampler.β_proposal, S, y, sampler.ω_proposal)
 
         # apply Metroplis step
         for k in 1:K
             ζ = rand()
             if (likelihood(subsample(sampler.β_proposal, k), subsample(F.β, k), sampler.γ) > ζ) && (norm(sampler.ω_proposal[k]) < sampler.ω_max)
-                copy_entries!(F.ω, ω_proposal, k)
-                copy_entries!(F.β, β_proposal, k)
+                copy_entries!(F.ω, sampler.ω_proposal, k)
+                copy_entries!(F.β, sampler.β_proposal, k)
                 accept_ += 1.0 / (K * sampler.n_rwm_steps)
             end
         end
@@ -87,15 +94,15 @@ function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:Abs
         # generate proposal
 
         @. sampler.ω_proposal = F.ω + sampler.δ * rand((sampler.mv_normal,))
-        assemble_matrix!(S, F.ϕ, x, ω_proposal)
+        assemble_matrix!(S, F.ϕ, x, sampler.ω_proposal)
         sampler.linear_solve!(sampler.β_proposal, S, y, sampler.ω_proposal)
 
         # apply Metroplis step
         for k in 1:K
             ζ = rand()
             if (likelihood(subsample(sampler.β_proposal, k), subsample(F.β, k), sampler.γ) > ζ) && (norm(sampler.ω_proposal[k]) < sampler.ω_max)
-                copy_entries!(F.ω, ω_proposal, k)
-                copy_entries!(F.β, β_proposal, k)
+                copy_entries!(F.ω, sampler.ω_proposal, k)
+                copy_entries!(F.β, sampler.β_proposal, k)
                 accept_ += 1.0 / (K * sampler.n_rwm_steps)
             end
         end
@@ -119,7 +126,7 @@ function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:Abs
         end
     end
     if (epoch > 1)
-        sampler.acceptance_rate[epoch] = sample.accept[epoch-1] + (accept_ - acceptance_rate[epoch-1]) / epoch
+        sampler.acceptance_rate[epoch] = sampler.acceptance_rate[epoch-1] + (accept_ - sampler.acceptance_rate[epoch-1]) / epoch
     else
         sampler.acceptance_rate[epoch] = accept_
     end

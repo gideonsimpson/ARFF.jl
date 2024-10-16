@@ -20,11 +20,15 @@ include("linear.jl")
 include("loss.jl")
 include("solver.jl")
 include("train.jl")
+include("train2.jl")
 include("train_scalar.jl")
+include("train_scalar2.jl")
 include("train_vector.jl")
+include("train_vector2.jl")
 
 export FourierModel, DataSet, ActivationFunction, ARFFOptions, ARFFSolver
 export train_rwm!, train_rwm
+export train_rwm2!
 export solve_normal!, solve_normal_svd!
 export optimal_γ, get_scalings, scale_data!,rescale_data!
 export append_bias

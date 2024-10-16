@@ -36,7 +36,7 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, Σ,
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x,rows), F.ω)
     solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y_mat, rows), F.ω)
 
-    p = Progress(options.n_epochs; enabled=show_progress)
+    pmeter = Progress(options.n_epochs; enabled=show_progress)
 
     for (i, data) in enumerate(data_sets)
         if i> options.n_epochs
@@ -102,7 +102,7 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, Σ,
         else
             push!(acceptance_rate, accept_)
         end
-        next!(p; showvalues=[(:loss, loss_), (:accept, accept_)])
+        next!(pmeter; showvalues=[(:loss, loss_), (:accept, accept_)])
     end
 
     return Σ_mean, acceptance_rate, loss

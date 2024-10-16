@@ -39,3 +39,12 @@ function copy_entries!(a::AbstractMatrix, b::AbstractMatrix, rows::TI) where {TI
     @. a[rows,:] = b[rows,:];
 
 end
+
+function trivial_mutate!(F, epoch)
+    F
+
+end
+
+function trivial_resample!(F, epoch)
+    F
+end
