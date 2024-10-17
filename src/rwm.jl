@@ -113,6 +113,11 @@ function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::T
     return AdaptiveRWMSampler(linear_solve!, n_rwm_steps, n_burn, deepcopy(F.β), deepcopy(F.ω), γ, δ, TR[], ω_max, deepcopy(F.ω[1]), deepcopy(F.ω[1]), deepcopy(Σ0), deepcopy(Σ0), MvNormal(Σ0))
 end
 
+"""
+    AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
+
+TBW
+"""
 function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
     ω_max = Inf
     γ = optimal_γ(F.dx);
