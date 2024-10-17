@@ -29,8 +29,8 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
         if (batch_size < N)
             rows = sample(1:N, batch_size, replace=false)
         end
-        # resampler goes here
-        solver.resample!(F, epoch);
+        # resample
+        solver.resample!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
 
         # perform mutation step
         solver.mutate!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch);
@@ -85,8 +85,8 @@ function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, s
         if (batch_size < N)
             rows = sample(1:N, batch_size, replace=false)
         end
-        # resampler goes here
-        solver.resample!(F, epoch)
+        # resample
+        solver.resample!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
 
         # perform mutation step
         solver.mutate!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)

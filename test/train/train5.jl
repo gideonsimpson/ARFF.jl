@@ -19,12 +19,11 @@ let
     Σ0 = Float64[1 0; 0 1]
 
     n_epochs = 1 * 10^2 # total number of iterations
-    n_ω_steps = 10 # number of steps between full β updates
+    n_rwm_steps = 10 # number of steps between full β updates
     n_burn = n_epochs ÷ 10
     batch_size = 100
     γ = optimal_γ(d)
     ω_max = Inf
-    adapt_covariance = true
 
     β_ = similar(F0.β[:, 1])
 
@@ -35,13 +34,11 @@ let
         end
         β
     end
-
-    opts = ARFFOptions(n_epochs, n_ω_steps, δ, n_burn, γ, ω_max,
-        adapt_covariance, component_solver!, ARFF.mse_loss)
+    rwm_sampler = AdaptiveRWMSampler(F0, component_solver!, n_rwm_steps, n_burn, Σ0, γ, δ,ω_max)
 
     Random.seed!(1000)
     F = deepcopy(F0)
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, batch_size, Σ0, opts, show_progress=false)
+    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, batch_size, rwm_sampler, n_epochs, show_progress=false)
 
     norm(F([1.0, 1.0]) - [1.0, 0.0]) < 1e-2
 end

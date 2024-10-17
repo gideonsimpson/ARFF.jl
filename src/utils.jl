@@ -40,11 +40,11 @@ function copy_entries!(a::AbstractMatrix, b::AbstractMatrix, rows::TI) where {TI
 
 end
 
-function trivial_mutate!(F, epoch)
+function trivial_mutate!(F, x, y, S, epoch)
     F
 
 end
 
-function trivial_resample!(F, epoch)
+function trivial_resample!(F, x, y, S, epoch)
     F
 end

@@ -22,10 +22,10 @@ let
 
     linear_solver! = (β, S, y, ω) -> solve_normal!(β, S, y, λ=λ)
 
-    rwm_sampler = AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps, n_burn, n_epochs, δ)
+    rwm_sampler = AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps, n_burn, δ)
     
     Random.seed!(1000) # for reproducibility
     F = deepcopy(F0)
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, batch_size, rwm_sampler, show_progress=false)
+    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, batch_size, rwm_sampler, n_epochs, show_progress=false)
     abs(F([0.02]) - f(0.02)) < 1e-3
 end

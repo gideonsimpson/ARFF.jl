@@ -35,11 +35,11 @@ let
         β
     end
 
-    rwm_sampler = AdaptiveRWMSampler(F0, component_solver!, n_rwm_steps, n_burn, n_epochs, δ)
+    rwm_sampler = AdaptiveRWMSampler(F0, component_solver!, n_rwm_steps, n_burn, δ)
 
     Random.seed!(1000)
     F = deepcopy(F0)
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, rwm_sampler, show_progress=false)
+    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, rwm_sampler, n_epochs, show_progress=false)
 
     norm(F([1.0, 1.0]) - [1.0, 0.0]) < 1e-2
 end

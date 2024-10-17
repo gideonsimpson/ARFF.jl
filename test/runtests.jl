@@ -50,6 +50,6 @@ end
     @test include("train/train2.jl")
     @test include("train/train3.jl")
     @test include("train/train4.jl")
-    # @test include("train/train5.jl")
-    # @test include("train/train6.jl")
+    @test include("train/train5.jl")
+    @test include("train/train6.jl")
 end
