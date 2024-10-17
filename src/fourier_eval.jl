@@ -1,5 +1,5 @@
 """
-    (F::ScalarFourierModel{TY,TR,TW})(x::TW) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    (F::ScalarFourierModel{TR,TY,TI,TA})(x::Vector{TR}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
 
 Overload evaluation operator so that `F(x)` can be evaluated, where `F`
 corresponds to the Fourier feature model.
@@ -15,7 +15,7 @@ end
 
 
 """
-    (F::VectorFourierModel{TC,TR,Vector{TR},Vector{TC}})(x::Vector{TR}) where {TC<:Complex,TR<:AbstractFloat}
+    (F::VectorFourierModel{TR,TY,TI,TA})(x::Vector{TR}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
 
 Overload evaluation operator so that `F(x)` can be evaluated, where `F`
 corresponds to the Fourier feature model.
@@ -31,7 +31,7 @@ end
 
 
 """
-    (F::ScalarFourierModel{TY,TR,TW})(x::TW, scalings::ScalarDataScalings{TY,TR,TW}) where {TY<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    (F::ScalarFourierModel{TR,TY,TI,TA})(x::Vector{TR}, scalings::ScalarDataScalings{TR,TY}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
 
 Overload evaluation operator so that `F(x)` can be evaluated, where `F`
 corresponds to the Fourier feature model.  This takes in the scalings argument
@@ -53,7 +53,7 @@ end
 
 
 """
-    (F::FourierModel{TY,TR,TW})(x::TW, scalings::DataScalings{TY,TR,TW}) where {TY<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    (F::VectorFourierModel{TR,TY,TI,TA})(x::Vector{TR}, scalings::VectorDataScalings{TR,TY}) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
 
 Overload evaluation operator so that `F(x)` can be evaluated, where `F`
 corresponds to the Fourier feature model.  This takes in the scalings argument

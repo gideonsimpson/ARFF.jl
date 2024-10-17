@@ -1,3 +1,20 @@
+"""
+    RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:AbstractVecOrMat} <: AbstractRWMSampler
+
+Data structure containing random walk Metrpolis sampler parameters and structures
+### Fields
+* `linear_solve!` - User specified solver for the normal equations
+* `n_rwm_steps` - Number of internal RWM steps
+* `n_burn` - Number of epochs before the covariance adaptation begins
+* `β_proposal` - workspace for β vector
+* `ω_proposal` - workspace for ω vector
+* `Σ` - Covariance matrix
+* `γ` - Metropolis-Hastings exponent
+* `δ` - RWM proposal step size
+* `acceptance_rate` - Array recording acceeptance rate
+* `ω_max` - Maximum wave number norm cutoff
+* `mv_normal` - Multivariate normal for RWM
+"""
 struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:AbstractVecOrMat} <: AbstractRWMSampler
     linear_solve!::TS
     n_rwm_steps::TI
@@ -12,19 +29,63 @@ struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:Abs
     mv_normal::TMN
 end
 
+"""
+    RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
+
+Constructor for the `RWMSampler` data structure
+### Fields
+* `F` - Fourier feature model; used for setting types and dimensions
+* `linear_solve!` - User specified solver for the normal equations
+* `n_rwm_steps` - Number of internal RWM steps
+* `n_burn` - Number of epochs before the covariance adaptation begins
+* `Σ` - Covariance matrix
+* `γ` - Metropolis-Hastings exponent
+* `δ` - RWM proposal step size
+* `ω_max` - Maximum wave number norm cutoff
+"""
 function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
-    return RWMSampler(linear_solve!, n_rwm_steps,n_burn, deepcopy(β_proposal), deepcopy(ω_proposal), deepcopy(Σ), γ, δ, TR[], ω_max, MvNormal(Σ))
+    return RWMSampler(linear_solve!, n_rwm_steps, n_burn, deepcopy(F.β), deepcopy(F.ω), deepcopy(Σ), γ, δ, TR[], ω_max, MvNormal(Σ))
 end
 
+"""
+    RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
+
+Constructor for the `RWMSampler` data structure.  Defaults to `ω_max = Inf`, `γ = optimal_γ(dx)`, and `Σ= I`
+### Fields
+* `F` - Fourier feature model; used for setting types and dimensions
+* `linear_solve!` - User specified solver for the normal equations
+* `n_rwm_steps` - Number of internal RWM steps
+* `n_burn` - Number of epochs before the covariance adaptation begins
+* `δ` - RWM proposal step size
+"""
 function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
     ω_max = Inf
     γ = optimal_γ(F.dx)
     Σ = Matrix{TR}(I(F.dx))
-    return RWMSampler(linear_solve!, n_rwm_steps, n_burn, deepcopy(β_proposal), deepcopy(ω_proposal), deepcopy(Σ), γ, δ, TR[], ω_max, MvNormal(Σ))
+    return RWMSampler(linear_solve!, n_rwm_steps, n_burn, deepcopy(F.β), deepcopy(F.ω), deepcopy(Σ), γ, δ, TR[], ω_max, MvNormal(Σ))
 end
 
 
+"""
+    AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<:AbstractVecOrMat} <: AbstractRWMSampler
 
+Data structure containing random walk Metrpolis sampler parameters and structures
+### Fields
+* `linear_solve!` - User specified solver for the normal equations
+* `n_rwm_steps` - Number of internal RWM steps
+* `n_burn` - Number of epochs before the covariance adaptation begins
+* `β_proposal` - workspace for β vector
+* `ω_proposal` - workspace for ω vector
+* `γ` - Metropolis-Hastings exponent
+* `δ` - RWM proposal step size
+* `acceptance_rate` - Array recording acceeptance rate
+* `ω_max` - Maximum wave number norm cutoff
+* `ω_mean_` - Instantaneous mean of wave numbers
+* `ω_mean` - Time averaged mean of wave numbers
+* `Σ_mean_` - Instantaneous covariance matrix
+* `Σ_mean` - Time averaged covariance matrix
+* `mv_normal` - Multivariate normal for RWM
+"""
 struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<:AbstractVecOrMat} <: AbstractRWMSampler
     linear_solve!::TS
     n_rwm_steps::TI
@@ -42,6 +103,11 @@ struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<
     mv_normal::TMN
 end
 
+"""
+    AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ0::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
+
+TBW
+"""
 function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ0::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
     
     return AdaptiveRWMSampler(linear_solve!, n_rwm_steps, n_burn, deepcopy(F.β), deepcopy(F.ω), γ, δ, TR[], ω_max, deepcopy(F.ω[1]), deepcopy(F.ω[1]), deepcopy(Σ0), deepcopy(Σ0), MvNormal(Σ0))
@@ -55,12 +121,22 @@ function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::T
 end
 
 
+"""
+    likelihood(β_new::TY, β_old::TY, γ::TI) where {TY<:Number,TI<:Integer}
+
+TBW
+"""
 function likelihood(β_new::TY, β_old::TY, γ::TI) where {TY<:Number,TI<:Integer}
 
     return (abs(β_new) / abs(β_old))^γ
 
 end
 
+"""
+    likelihood(β_new::AbstractVector{TY}, β_old::AbstractVector{TY}, γ::TI) where {TY<:Number,TI<:Integer}
+
+TBW
+"""
 function likelihood(β_new::AbstractVector{TY}, β_old::AbstractVector{TY}, γ::TI) where {TY<:Number,TI<:Integer}
 
     return (norm(β_new) / norm(β_old))^γ

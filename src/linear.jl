@@ -17,18 +17,6 @@ function assemble_matrix!(S::Matrix{TY}, ϕ::ActivationFunction{TY},
     S
 end
 
-# function assemble_matrix!(S, ϕ, x_data, ω_vals)
-#     N = length(x_data)
-#     K = length(ω_vals)
-
-#     Threads.@threads for k in 1:K
-#         for n in 1:N
-#             S[n, k] = ϕ(ω_vals[k], x_data[n])
-#         end
-#     end
-#     S
-# end
-
 
 """
     solve_normal!(β, S, y_data; λ = 1e-8)
@@ -40,22 +28,13 @@ Solve the regularized linear system using the normal equations.
 * `y_data` - y coordinates
 * `λ = 1e-8` - Regularization parameter
 """
-function solve_normal!(β::AbstractVecOrMat{TY}, S::Matrix{TY}, y_data::AbstractVecOrMat{TY}; λ=1e-8) where {TY<:Number}
+function solve_normal!(β::AbstractVecOrMat{TY}, S::AbstractMatrix{TY}, y_data::AbstractVecOrMat{TY}; λ=1e-8) where {TY<:Number}
     N = length(y_data)
     
     β .= (S' * S + λ * N * I) \ (S' * y_data)
 
     β
 end
-
-# function solve_normal!(β::Matrix{TY}, S::Matrix{TY}, y_data::Matrix{TY}; λ=1e-8) where {TY<:Number}
-#     N = length(y_data)
-
-#     β .= (S' * S + λ * N * I) \ (S' * y_data)
-
-#     β
-# end
-
 
 """
     solve_normal_svd!(β, S, y_data; λ = 1e-8)
@@ -67,7 +46,7 @@ Solve the regularized linear system using the SVD.
 * `y_data` - y coordinates
 * `λ = 1e-8` - Regularization parameter
 """
-function solve_normal_svd!(β::Vector{TY}, S::Matrix{TY}, y_data::Vector{TY}; λ=1e-8) where {TY<:Number}
+function solve_normal_svd!(β::AbstractVecOrMat{TY}, S::AbstractMatrix{TY}, y_data::AbstractVecOrMat{TY}; λ=1e-8) where {TY<:Number}
 
     F = svd(S)
     N = length(y_data)

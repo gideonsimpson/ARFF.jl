@@ -17,6 +17,12 @@ function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,T
     return rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
 end
 
+"""
+    train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
+    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+
+TBW
+"""
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
     show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 

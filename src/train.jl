@@ -1,3 +1,8 @@
+"""
+    train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
+
+TBW
+"""
 function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
 
     # extract values
@@ -51,6 +56,11 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
     return loss
 end
 
+"""
+    train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
+
+TBW
+"""
 function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
 
     F = deepcopy(F₀)
