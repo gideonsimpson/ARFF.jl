@@ -17,21 +17,15 @@ let
     λ = 1e-8 # regularization
     n_epochs = 10^3 # number of epochs
     batch_size = 50
-    n_ω_steps = 10 # number of steps between full β updates
+    n_rwm_steps = 10 # number of steps between full β updates
     n_burn = n_epochs ÷ 10 # use 10% of the run for burn in
-    γ = optimal_γ(d)
-    ω_max = Inf # no cut off
-    adapt_covariance = true
 
-    Σ0 = ones(1, 1)
+    linear_solver! = (β, S, y, ω) -> solve_normal!(β, S, y, λ=λ)
 
-    β_solver! = (β, S, y, ω) -> solve_normal!(β, S, y, λ=λ)
-
-    opts = ARFFOptions(n_epochs, n_ω_steps, δ, n_burn, γ, ω_max, adapt_covariance,
-        β_solver!, ARFF.mse_loss)
-
+    rwm_sampler = AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps, n_burn, n_epochs, δ)
+    
     Random.seed!(1000) # for reproducibility
     F = deepcopy(F0)
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, batch_size, Σ0, opts, show_progress=false)
+    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, batch_size, rwm_sampler, show_progress=false)
     abs(F([0.02]) - f(0.02)) < 1e-3
 end

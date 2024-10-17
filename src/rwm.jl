@@ -13,16 +13,20 @@ struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:Abs
     mv_normal::TMN
 end
 
-function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI,TM,TR}
-    <:AbstractRWMSampler
-    β_proposal = similar(F.β)
-    ω_proposal = similar(F.ω)
+function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
     return RWMSampler(linear_solve!, n_rwm_steps,n_burn, n_epochs, deepcopy(β_proposal), deepcopy(ω_proposal), deepcopy(Σ), γ, δ, zeros(n_epochs), ω_max, MvNormal(Σ))
+end
+
+function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
+    ω_max = Inf
+    γ = optimal_γ(F.dx)
+    Σ = Matrix{TR}(I(F.dx))
+    return RWMSampler(linear_solve!, n_rwm_steps, n_burn, n_epochs, deepcopy(β_proposal), deepcopy(ω_proposal), deepcopy(Σ), γ, δ, zeros(n_epochs), ω_max, MvNormal(Σ))
 end
 
 
 
-struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<:AbstractVecOrMat}
+struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<:AbstractVecOrMat} <: AbstractRWMSampler
     linear_solve!::TS
     n_rwm_steps::TI
     n_burn::TI
@@ -40,10 +44,18 @@ struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<
     mv_normal::TMN
 end
 
-function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, Σ0::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI,TM,TR}
-    return AdaptiveRWMSampler(linear_solve!, n_rwm_steps, n_burn, n_epochs, deepcopy(F.β), deepcopy(F.ω),
-        γ, δ, zeros(n_epochs), ω_max, deepcopy(F.ω[1]), deepcopy(F.ω[1]), deepcopy(Σ0), deepcopy(Σ0), MvNormal(Σ0))
+function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, Σ0::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
+    
+    return AdaptiveRWMSampler(linear_solve!, n_rwm_steps, n_burn, n_epochs, deepcopy(F.β), deepcopy(F.ω), γ, δ, zeros(n_epochs), ω_max, deepcopy(F.ω[1]), deepcopy(F.ω[1]), deepcopy(Σ0), deepcopy(Σ0), MvNormal(Σ0))
 end
+
+function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, n_epochs::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
+    ω_max = Inf
+    γ = optimal_γ(F.dx);
+    Σ0 = Matrix{TR}(I(F.dx))
+    return AdaptiveRWMSampler(linear_solve!, n_rwm_steps, n_burn, n_epochs, deepcopy(F.β), deepcopy(F.ω), γ, δ, zeros(n_epochs), ω_max, deepcopy(F.ω[1]), deepcopy(F.ω[1]), deepcopy(Σ0), deepcopy(Σ0), MvNormal(Σ0))
+end
+
 
 function likelihood(β_new::TY, β_old::TY, γ::TI) where {TY<:Number,TI<:Integer}
 
@@ -57,6 +69,11 @@ function likelihood(β_new::AbstractVector{TY}, β_old::AbstractVector{TY}, γ::
 
 end
 
+"""
+    rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
+
+TBW
+"""
 function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
     K = length(F);
     accept_ = 0.0
@@ -88,6 +105,11 @@ function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFou
     F, sampler
 end
 
+"""
+    rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
+
+TBW
+"""
 function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
     K = length(F)
     accept_ = 0.0

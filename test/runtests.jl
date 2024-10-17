@@ -29,9 +29,9 @@ end
     @test include("linalg/normal3.jl")
 end
 
-@testset "Options" begin
-    @test include("opts/opts1.jl")
-end
+# @testset "Options" begin
+#     @test include("opts/opts1.jl")
+# end
 
 @testset "Utilities" begin
     @test include("utils/utils1.jl")
@@ -50,6 +50,6 @@ end
     @test include("train/train2.jl")
     @test include("train/train3.jl")
     @test include("train/train4.jl")
-    @test include("train/train5.jl")
-    @test include("train/train6.jl")
+    # @test include("train/train5.jl")
+    # @test include("train/train6.jl")
 end

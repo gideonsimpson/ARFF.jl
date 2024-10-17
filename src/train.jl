@@ -18,7 +18,7 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x, rows), F.ω)
     solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y_mat, rows), F.ω)
 
-    pmeter = Progress(options.n_epochs; enabled=show_progress)
+    pmeter = Progress(solver.n_epochs; enabled=show_progress)
 
     for (epoch, data) in enumerate(data_sets)
         if epoch > solver.n_epochs
@@ -74,7 +74,7 @@ function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, s
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x, rows), F.ω)
     solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y_mat, rows), F.ω)
 
-    pmeter = Progress(options.n_epochs; enabled=show_progress)
+    pmeter = Progress(solver.n_epochs; enabled=show_progress)
 
     for (epoch, data) in enumerate(data_sets)
         if epoch > solver.n_epochs

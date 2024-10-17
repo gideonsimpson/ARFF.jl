@@ -5,17 +5,28 @@
 
 TBW
 """
-function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI},
-    Σ::Matrix{TR}, options::ARFFOptions;
-    show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
+function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI}, rwm_sampler::TS;
+    show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB},TS<:AbstractRWMSampler}
+    
     N = length(data)
-
-    rwm_sampler = ARFF.AdaptiveRWMSampler(F, options.linear_solve!, options.n_ω_steps, options.n_burn, options.n_epochs, Σ, options.γ, options.δ, options.ω_max)
+    
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
-    solver = ARFFSolver(options.linear_solve!, mutate_rwm!, ARFF.trivial_resample!)
+    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, rwm_sampler.n_epochs, mse_loss)
 
-    loss = train_arff2!(F, Iterators.cycle([data]), N, solver, options, show_progress=show_progress, record_loss=record_loss)
+    loss = train_arff!(F, Iterators.cycle([data]), N, solver, show_progress=show_progress, record_loss=record_loss)
+
+    return rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
+end
+
+function train_rwm!(F::VectorFourierModel{TR,TB,TI,TA}, data::VectorDataSet{TR,TB,TI}, batch_size::TI, rwm_sampler::TS;
+    show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB},TS<:AbstractRWMSampler}
+
+    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
+
+    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, rwm_sampler.n_epochs, mse_loss)
+
+    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, show_progress=show_progress, record_loss=record_loss)
 
     return rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
 end
