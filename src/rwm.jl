@@ -50,7 +50,8 @@ end
 """
     RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
 
-Constructor for the `RWMSampler` data structure.  Defaults to `ω_max = Inf`, `γ = optimal_γ(dx)`, and `Σ= I`
+Constructor for the `RWMSampler` data structure.  Defaults to `ω_max = Inf`, `γ
+= optimal_γ(dx)`, and `Σ= I`
 ### Fields
 * `F` - Fourier feature model; used for setting types and dimensions
 * `linear_solve!` - User specified solver for the normal equations
@@ -69,7 +70,7 @@ end
 """
     AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<:AbstractVecOrMat} <: AbstractRWMSampler
 
-Data structure containing random walk Metrpolis sampler parameters and structures
+Data structure containing adaptive random walk Metrpolis sampler parameters and structures
 ### Fields
 * `linear_solve!` - User specified solver for the normal equations
 * `n_rwm_steps` - Number of internal RWM steps
@@ -106,7 +107,16 @@ end
 """
     AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ0::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
 
-TBW
+Constructor for the `AdaptiveRWMSampler` data structure
+### Fields
+* `F` - Fourier feature model; used for setting types and dimensions
+* `linear_solve!` - User specified solver for the normal equations
+* `n_rwm_steps` - Number of internal RWM steps
+* `n_burn` - Number of epochs before the covariance adaptation begins
+* `Σ0` - Initial covariance matrix
+* `γ` - Metropolis-Hastings exponent
+* `δ` - RWM proposal step size
+* `ω_max` - Maximum wave number norm cutoff
 """
 function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ0::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
     
@@ -116,7 +126,14 @@ end
 """
     AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
 
-TBW
+Constructor for the `AdaptiveRWMSampler` data structure. Defaults to `ω_max =
+Inf`, `γ = optimal_γ(dx)`, and `Σ0= I`
+### Fields
+* `F` - Fourier feature model; used for setting types and dimensions
+* `linear_solve!` - User specified solver for the normal equations
+* `n_rwm_steps` - Number of internal RWM steps
+* `n_burn` - Number of epochs before the covariance adaptation begins
+* `δ` - RWM proposal step size
 """
 function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
     ω_max = Inf
@@ -127,9 +144,13 @@ end
 
 
 """
-    likelihood(β_new::TY, β_old::TY, γ::TI) where {TY<:Number,TI<:Integer}
+    likelihood(β_new, β_old, γ) where {TY<:Number,TI<:Integer}
 
-TBW
+Likelihood ratio for Metropois-Hastings with exponent `γ`
+### Fields
+* `β_new` - New (proposed) `β`
+* `β_old` - Old `β`
+* `γ` - Metropolis-Hastings exponent
 """
 function likelihood(β_new::TY, β_old::TY, γ::TI) where {TY<:Number,TI<:Integer}
 
@@ -138,9 +159,13 @@ function likelihood(β_new::TY, β_old::TY, γ::TI) where {TY<:Number,TI<:Intege
 end
 
 """
-    likelihood(β_new::AbstractVector{TY}, β_old::AbstractVector{TY}, γ::TI) where {TY<:Number,TI<:Integer}
+    likelihood(β_new, β_old, γ) where {TY<:Number,TI<:Integer}
 
-TBW
+Likelihood ratio for Metropois-Hastings with exponent `γ`
+### Fields
+* `β_new` - New (proposed) `β`
+* `β_old` - Old `β`
+* `γ` - Metropolis-Hastings exponent    
 """
 function likelihood(β_new::AbstractVector{TY}, β_old::AbstractVector{TY}, γ::TI) where {TY<:Number,TI<:Integer}
 
@@ -149,9 +174,16 @@ function likelihood(β_new::AbstractVector{TY}, β_old::AbstractVector{TY}, γ::
 end
 
 """
-    rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
+    rwm!(F, sampler, x, y, S, epoch) 
 
-TBW
+Perform random walk Metrpolis with the specified parameters
+### Fields
+* `F` - Fourier features model, which is modified in place
+* `sampler` - The RWM sampler which contains parameters and workspace
+* `x` - x coordinates from data used during RWM
+* `y` - y coordinates from data used during RWM
+* `S` - S matrix used during RWM
+* `epoch` - Current training epoch
 """
 function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
     K = length(F);
@@ -185,9 +217,14 @@ function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFou
 end
 
 """
-    rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
+    rwm!(F, sampler, x, y, S, epoch) 
 
-TBW
+* `F` - Fourier features model, which is modified in place
+* `sampler` - The RWM sampler which contains parameters and workspace
+* `x` - x coordinates from data used during RWM
+* `y` - y coordinates from data used during RWM
+* `S` - S matrix used during RWM
+* `epoch` - Current training epoch
 """
 function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
     K = length(F)
