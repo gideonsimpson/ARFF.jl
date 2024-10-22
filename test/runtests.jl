@@ -3,6 +3,7 @@ using ARFF
 using Random
 using Statistics
 using LinearAlgebra
+using Distributions
 using SpecialFunctions
 
 @testset "Scalar Data Sets" begin
@@ -34,6 +35,7 @@ end
 # end
 
 @testset "Utilities" begin
+    @test include("utils/resample1.jl")
     @test include("utils/utils1.jl")
     @test include("utils/eval1.jl")
     @test include("utils/eval2.jl")

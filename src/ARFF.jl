@@ -20,6 +20,7 @@ include("linear.jl")
 include("loss.jl")
 include("solver.jl")
 include("train.jl")
+include("resample.jl")
 # include("train2.jl")
 include("train_rwm_scalar.jl")
 # include("train_scalar2.jl")
@@ -32,6 +33,7 @@ export train_arff!, train_arff, train_rwm!, train_rwm
 export solve_normal!, solve_normal_svd!
 export optimal_γ, get_scalings, scale_data!,rescale_data!
 export append_bias
+export resample!
 export FourierActivation, SigmoidActivation, ArcTanActivation
 
 end # module ARFF

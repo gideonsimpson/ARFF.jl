@@ -1,4 +1,4 @@
-function resample!(F, solver, x, y, S, epoch, R)
+function resample!(F, linear_solver!, x, y, S, R)
     K = length(F.ω);
     idx_original = 1:K;
 
@@ -15,7 +15,7 @@ function resample!(F, solver, x, y, S, epoch, R)
         ω_resampled = F.ω[idx_resampled];
 
         assemble_matrix!(S, F.ϕ, x, ω_resampled);
-        solver.linear_solve!(F.β, S, y, ω_resampled);
+        linear_solver!(F.β, S, y, ω_resampled);
 
         F = FourierModel(F.β, ω_resampled, F.ϕ);
     end
