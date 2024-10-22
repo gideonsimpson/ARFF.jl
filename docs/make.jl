@@ -16,6 +16,7 @@ bib = CitationBibliography(joinpath(@__DIR__, "src", "refs.bib"); style=:numeric
 makedocs(checkdocs=:none,
     sitename = "ARFF.jl",
     modules  = [ARFF],
+    draft = false,
     format=Documenter.HTML(
         # ...
         assets=String["assets/citations.css"],
@@ -24,10 +25,9 @@ makedocs(checkdocs=:none,
     pages=[
         "Home" => "index.md",
         "Structures" => ["structs/data.md", "structs/activation.md", "structs/fourier.md"],
-        "Training" => "train.md",
+        "Training" => ["train/general.md", "train/rwm.md"],
         "Auxiliary Functions and Utilities"=>"aux.md",
-        "Examples" => ["examples/example1.md", 
-            "examples/example2.md", "examples/example3.md", "examples/vector1.md"]
+        "Examples" => ["examples/example1.md", "examples/example2.md", "examples/example3.md", "examples/vector1.md"]
     ])
 deploydocs(;
     repo="github.com/gideonsimpson/ARFF.jl",

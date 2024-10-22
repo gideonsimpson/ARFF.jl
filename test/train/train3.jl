@@ -24,7 +24,8 @@ let
     n_rwm_steps = 10 # number of steps between full β updates
     n_burn = n_epochs ÷ 10 # use 10% of the run for burn in
 
-    linear_solver! = (β, S, y, ω) -> solve_normal!(β, S, y, λ=λ)
+    # linear_solver! = (β, S, y, ω) -> solve_normal!(β, S, y, λ=λ)
+    linear_solver! = (β, ω, x, y, S, epoch) -> solve_normal!(β, S, y, λ=λ)
 
     rwm_sampler = AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps, n_burn, δ)
 

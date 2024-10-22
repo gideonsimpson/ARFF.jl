@@ -5,7 +5,9 @@ Consider trying to learn the scalar mapping
 ```math
 f(x) = \mathrm{Si}\left(\frac{x}{a}\right)e^{-\frac{x^2}{2}}, \quad a>0,
 ```
-where ``\mathrm{Si}`` is the [Sine integral](https://en.wikipedia.org/wiki/Trigonometric_integral).  To make the problem somewhat challenging, we take ``a=10^{-3}``.
+where ``\mathrm{Si}`` is the [Sine
+integral](https://en.wikipedia.org/wiki/Trigonometric_integral).  To make the
+problem somewhat challenging, we take ``a=10^{-3}``.
 
 ## Generate Training Data
 First, we will generate and visualize the training data:
@@ -46,29 +48,23 @@ Random.seed!(200); # for reproducibility
 F0 = FourierModel([1. *randn(ComplexF64) for _ in 1:K],  
     [randn(d) for _ in 1:K]); nothing
 ```
-This uses the default complex exponential activation functions.
+This defaults to complex exponential activation functions.
 
 ## Set Parameters and Train
 ```@example ex1
 δ = 10.; # rwm step size
-λ = 1e-8; # regularization
+λ = 1e-6; # regularization
 n_epochs = 10^3; # number of epochs
-n_ω_steps = 10; # number of steps between full β updates
+n_rwm_steps = 10; # number of RWM steps during mutation
 n_burn = n_epochs ÷ 10; # use 10% of the run for burn in
-γ = optimal_γ(d); 
-ω_max =Inf; # no cut off
-adapt_covariance = true; 
 
-Σ0 = ones(1,1);
+linear_solver! = (β, ω, x, y, S, epoch)-> solve_normal!(β, S, y, λ=λ);
 
-β_solver! = (β, S, y, ω)-> solve_normal!(β, S, y, λ=λ);
-
-opts = ARFFOptions(n_epochs, n_ω_steps, δ, n_burn, γ, ω_max,adapt_covariance, 
-    β_solver!, ARFF.mse_loss);
+rwm_sampler = AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps, n_burn, δ);
 
 Random.seed!(1000); # for reproducibility
 F = deepcopy(F0);
-Σ_mean, acceptance_rate, loss= train_rwm!(F, data, Σ0, opts, show_progress=false); nothing 
+Σ_mean, acceptance_rate, loss= train_rwm!(F, data, rwm_sampler, n_epochs, show_progress=false); nothing 
 ```
 ## Evaluate Results
 Looking at the trianing loss, we see the model appears to be well trained for the selected width, ``K``:

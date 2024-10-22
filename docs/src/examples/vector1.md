@@ -52,21 +52,23 @@ F0 = FourierModel([1.0 * randn(d) for _ in 1:K],
 δ = 0.1; # rwm step size
 λ = 1e-6; # regularization
 n_epochs = 10^3; # total number of iterations
-n_ω_steps = 10; # number of steps between full β updates
+n_rwm_steps = 10; # number of steps between full β updates
 n_burn = n_epochs ÷ 10;
-γ = optimal_γ(d);
-ω_max =Inf;
-adapt_covariance = true;
 
-Σ0 = Float64[1 0; 0 1];
-β_solver! = (β, S, y, ω)-> solve_normal!(β, S, y, λ=λ);
+β_ = similar(F0.β[:, 1])
+function component_solver!(β, ω, x, y, S, epoch)
+    for d_ in 1:d
+        solve_normal!(β_, S, @view(y[:, d_]))
+        @. β[:, d_] = β_
+    end
+    β
+end
 
-opts = ARFFOptions(n_epochs, n_ω_steps, δ, n_burn, γ, ω_max,adapt_covariance, 
-    β_solver!, ARFF.mse_loss);
+rwm_sampler = AdaptiveRWMSampler(F0, component_solver!, n_rwm_steps, n_burn, δ)
 
 Random.seed!(1000);
 F = deepcopy(F0);
-Σ_mean, acceptance_rate, loss = train_rwm!(F, data, Σ0, opts, show_progress=false); nothing
+Σ_mean, acceptance_rate, loss = train_rwm!(F, data, rwm_sampler,n_epochs, show_progress=false); nothing
 ```
 ## Evaluate Results
 Looking at the trianing loss, we see the model appears to be well trained for the selected width, ``K``:

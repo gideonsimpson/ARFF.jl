@@ -47,16 +47,6 @@ function Base.length(F::TF) where {TF<:AbstractFourierModel}
     return F.K
 end
 
-# """
-#     Base.size(F::TF) where {TF<:ScalarFourierModel}
-
-# Returns the tuple `(K, dx)` of the number of terms, `K`, and the dimension of
-# the domain, `dx`, of a scalar valued Fourier model.
-# """
-# function Base.size(F::TF) where {TF<:ScalarFourierModel}
-#     return (F.K, F.dx)
-# end
-
 """
     Base.size(F::TF) where {TF<:VectorFourierModel}
 
@@ -95,7 +85,6 @@ end
 
 Iterate through the `(β, ω)` pairs characterizng the Fourier model
 """
-# function Base.iterate(F::TF, state=1) where {TF<:AbstractFourierModel}
 function Base.iterate(F::TF, state=1) where {TF<:VectorFourierModel}
     if state > F.K
         return nothing
@@ -130,7 +119,6 @@ Constructor for a Fourier features model.
 * `ϕ` - Activation function of `ActivationFunction` type.  The data type of the
   `β` must agree with the data type of the range of `ϕ`.
 """
-
 function FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}, ϕ::TA) where {TY<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TY}}
     K = length(ω)
     dx = length(ω[1])

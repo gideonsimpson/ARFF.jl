@@ -1,5 +1,5 @@
 """
-    ARFFSolver{TS, TE, TR, TI<:Integer, TL}
+    ARFFSolver{TS, TM, TR, TI<:Integer, TL}
 
 Data structure containing key parameters for ARFF training
 ### Fields
@@ -9,9 +9,9 @@ Data structure containing key parameters for ARFF training
 * `n_epochs` - Total number of training epochs
 * `loss` - Loss function
 """
-struct ARFFSolver{TS, TE, TR, TI<:Integer, TL}
+struct ARFFSolver{TS, TM, TR, TI<:Integer, TL}
     linear_solve!::TS
-    mutate!::TE
+    mutate!::TM
     resample!::TR
     n_epochs::TI
     loss::TL

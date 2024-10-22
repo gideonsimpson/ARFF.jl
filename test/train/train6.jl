@@ -32,7 +32,8 @@ let
 
     Σ0 = Float64[1 0; 0 1]
 
-    linear_solver! = (β, S, y, ω) -> solve_normal!(β, S, y, λ=λ)
+    # linear_solver! = (β, S, y, ω) -> solve_normal!(β, S, y, λ=λ)
+    linear_solver! = (β, ω, x, y, S, epoch) -> solve_normal!(β, S, y, λ=λ)
 
     rwm_sampler = AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps, n_burn, Σ0, γ, δ, ω_max)
 

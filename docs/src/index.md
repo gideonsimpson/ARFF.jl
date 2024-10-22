@@ -66,7 +66,7 @@ temperature.
 
 ### Training
 Having described a single the RWM step, the core of ARFF training requires  a
-total number of epochs (`n_epochs`) and number of RWM steps (`n_ω_steps`).  The
+total number of epochs (`n_epochs`) and number of RWM steps (`n_rwm_steps`).  The
 core of the training loop consists of:
 ```
 for i in 1:n_epochs
@@ -79,7 +79,14 @@ for i in 1:n_epochs
     end
 end
 ```
+In the current version of `ARFF.jl`, the RWM piece is encapsulated inside of a
+`mutate!` operation, which can be modified as the user desires.
 
+## Notes on Current Training Implementation
+This package has undergone several revisions.  In the current form, one can specify two actions:
+* `resample!` - The resampling step resamples amongs the current set of wave numbers.  Resampling was introduced to the training method for ARFF in [kammonen_adaptive_2024](@cite).
+* `mutate!` - The mutation step is what discovers new weave numbers.  In the current implementation, this corresponds to the RWM step.
+These two procedures are empedded within a [`ARFFSolver`](@ref) structure.
 
 ## Acknowledgements
 

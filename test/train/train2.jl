@@ -26,8 +26,8 @@ let
 
     # allocate memory
     β_ = similar(F0.β[:, 1])
-
-    function component_solver!(β, S, y, ω)
+    
+    function component_solver!(β, ω, x, y, S, epoch)
         for d_ in 1:d
             solve_normal!(β_, S, @view(y[:, d_]))
             @. β[:, d_] = β_

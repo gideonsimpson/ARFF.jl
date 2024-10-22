@@ -1,7 +1,14 @@
 """
-    train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
+    train_arff!(F, data_sets, batch_size, solver; show_progress=true, record_loss=true) 
 
-TBW
+Perform RWM training in place on an ARFF model
+### Fields
+* `F` - Fourier feature model to be trained, in place
+* `data_sets` - Training data sets 
+* `batch_size` - Minibatch size
+* `solver` - An `ARFFSolver` data structure
+* `show_progress=true` - Display training progress using `ProgressMeter`
+* `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
 
@@ -21,7 +28,8 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
         rows = sample(1:N, batch_size, replace=false)
     end
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x, rows), F.ω)
-    solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y_mat, rows), F.ω)
+    solver.linear_solve!(F.β, F.ω, subsample(Iterators.first(data_sets).x, rows), subsample(Iterators.first(data_sets).y_mat, rows), S, 0)
+    # solver.linear_solve!(F, )
 
     pmeter = Progress(solver.n_epochs; enabled=show_progress)
 
@@ -42,7 +50,8 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
 
         # perform full β update
         assemble_matrix!(S, F.ϕ, subsample(data.x, rows), F.ω);
-        solver.linear_solve!(F.β, S, subsample(data.y_mat, rows), F.ω);
+        solver.linear_solve!(F.β, F.ω, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
+        # solver.linear_solve!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
 
         # record loss
         if record_loss
@@ -57,9 +66,16 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
 end
 
 """
-    train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
+    train_arff(F₀, data_sets, batch_size, solver; show_progress=true, record_loss=true) 
 
-TBW
+Perform RWM training an ARFF model, recording the result at all epochs.
+### Fields
+* `F₀` - Initial fourier feature model to be trained
+* `data_sets` - Training data sets 
+* `batch_size` - Minibatch size
+* `solver` - An `ARFFSolver` data structure
+* `show_progress=true` - Display training progress using `ProgressMeter`
+* `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
 
@@ -82,8 +98,10 @@ function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, s
         rows = sample(1:N, batch_size, replace=false)
     end
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x, rows), F.ω)
-    solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y_mat, rows), F.ω)
-
+    # solver.linear_solve!(F.β, S, subsample(Iterators.first(data_sets).y_mat, rows), F.ω)
+    # solver.linear_solve!(F, subsample(Iterators.first(data_sets).x, rows), subsample(Iterators.first(data_sets).y_mat, rows), S, 0);
+    solver.linear_solve!(F.β, F.ω, subsample(Iterators.first(data_sets).x, rows), subsample(Iterators.first(data_sets).y_mat, rows), S, 0)
+    
     pmeter = Progress(solver.n_epochs; enabled=show_progress)
 
     for (epoch, data) in enumerate(data_sets)
@@ -103,7 +121,8 @@ function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, s
 
         # perform full β update
         assemble_matrix!(S, F.ϕ, subsample(data.x, rows), F.ω)
-        solver.linear_solve!(F.β, S, subsample(data.y_mat, rows), F.ω)
+        # solver.linear_solve!(F.β, S, subsample(data.y_mat, rows), F.ω)
+        solver.linear_solve!(F.β, F.ω, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
 
         # record F_trajectory
         push!(F_trajectory, deepcopy(F))

@@ -30,7 +30,7 @@ struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:Abs
 end
 
 """
-    RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
+    RWMSampler(F, linear_solve!, n_rwm_steps, n_burn, Σ, γ, δ, ω_max) 
 
 Constructor for the `RWMSampler` data structure
 ### Fields
@@ -48,7 +48,7 @@ function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ::T
 end
 
 """
-    RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
+    RWMSampler(F, linear_solve!, n_rwm_steps, n_burn, δ)
 
 Constructor for the `RWMSampler` data structure.  Defaults to `ω_max = Inf`, `γ
 = optimal_γ(dx)`, and `Σ= I`
@@ -105,7 +105,7 @@ struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<
 end
 
 """
-    AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ0::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
+    AdaptiveRWMSampler(F, linear_solve!, n_rwm_steps, n_burn, Σ0, γ, δ, ω_max)
 
 Constructor for the `AdaptiveRWMSampler` data structure
 ### Fields
@@ -124,7 +124,7 @@ function AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::T
 end
 
 """
-    AdaptiveRWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
+    AdaptiveRWMSampler(F, linear_solve!, n_rwm_steps, n_burn, δ)
 
 Constructor for the `AdaptiveRWMSampler` data structure. Defaults to `ω_max =
 Inf`, `γ = optimal_γ(dx)`, and `Σ0= I`
@@ -144,7 +144,7 @@ end
 
 
 """
-    likelihood(β_new, β_old, γ) where {TY<:Number,TI<:Integer}
+    likelihood(β_new, β_old, γ)
 
 Likelihood ratio for Metropois-Hastings with exponent `γ`
 ### Fields
@@ -159,7 +159,7 @@ function likelihood(β_new::TY, β_old::TY, γ::TI) where {TY<:Number,TI<:Intege
 end
 
 """
-    likelihood(β_new, β_old, γ) where {TY<:Number,TI<:Integer}
+    likelihood(β_new, β_old, γ)
 
 Likelihood ratio for Metropois-Hastings with exponent `γ`
 ### Fields
@@ -189,12 +189,12 @@ function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFou
     K = length(F);
     accept_ = 0.0
 
-    for j in sampler.n_rwm_steps
+    for j in 1:sampler.n_rwm_steps
         # generate proposal
 
         @. sampler.ω_proposal = F.ω + sampler.δ * rand((sampler.mv_normal,))
         assemble_matrix!(S, F.ϕ, x, sampler.ω_proposal)
-        sampler.linear_solve!(sampler.β_proposal, S, y, sampler.ω_proposal)
+        sampler.linear_solve!(sampler.β_proposal, sampler.ω_proposal, x, y, S, epoch)
 
         # apply Metroplis step
         for k in 1:K
@@ -234,7 +234,7 @@ function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:Abs
 
         @. sampler.ω_proposal = F.ω + sampler.δ * rand((sampler.mv_normal,))
         assemble_matrix!(S, F.ϕ, x, sampler.ω_proposal)
-        sampler.linear_solve!(sampler.β_proposal, S, y, sampler.ω_proposal)
+        sampler.linear_solve!(sampler.β_proposal, sampler.ω_proposal, x, y, S, epoch)
 
         # apply Metroplis step
         for k in 1:K

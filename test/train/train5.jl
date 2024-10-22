@@ -26,15 +26,15 @@ let
     ω_max = Inf
 
     β_ = similar(F0.β[:, 1])
-
-    function component_solver!(β, S, y, ω)
+    function component_solver!(β, ω, x, y, S, epoch)
         for d_ in 1:d
             solve_normal!(β_, S, @view(y[:, d_]))
             @. β[:, d_] = β_
         end
         β
     end
-    rwm_sampler = AdaptiveRWMSampler(F0, component_solver!, n_rwm_steps, n_burn, Σ0, γ, δ,ω_max)
+
+    rwm_sampler = AdaptiveRWMSampler(F0, component_solver!, n_rwm_steps, n_burn, Σ0, γ, δ, ω_max)
 
     Random.seed!(1000)
     F = deepcopy(F0)

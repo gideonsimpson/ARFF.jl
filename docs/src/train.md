@@ -11,11 +11,11 @@ This is implemented to handle the training data in several ways:
 
 ## In Place Training
 For both the scalar and vector valued case, we have the following commands:
-```@docs
+<!-- ```@docs
     train_rwm!(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data::ARFF.ScalarDataSet{TR,TB,TI}, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer, TA<:ARFF.ActivationFunction{TB}}
     train_rwm!(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data::ARFF.ScalarDataSet{TR,TB,TI}, batch_size::TI, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ARFF.ActivationFunction{TB}}    
-    train_rwm!(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ARFF.ScalarDataSet{TR,TB,TI}}, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ARFF.ActivationFunction{TB}}
-```
+    train_rwm!(F::ARFF.ScalarFourierModel{TR,TB,TI,TA}, data_sets::Vector{ARFF.ScalarDataSet{TR,TB,TI}}, Σ::Matrix{TR}, options::ARFF.ARFFOptions; show_progress=true, record_loss=true) where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ARFF.ActivationFunction{TB}} 
+```-->
 Having created an initial `F` we can then call
 ```
 Σ_mean, acceptance_rate, loss = train_rwm!(F, data, Σ0, opts);
