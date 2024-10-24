@@ -36,7 +36,7 @@ d=2;
 Random.seed!(100)
 x_data = [randn(2) for _ in 1:N];
 y_data = [[f1(x_), f2(x_)] for x_ in x_data];
-data = DataSet(x_data, complex.(y_data));
+data = DataSet(x_data, complex.(y_data)); nothing
 ```
 ## Initialize Fourier Model
 Next, we need to initialize our [`FourierModel`](@ref)
@@ -45,7 +45,7 @@ K = 2^6;
 Random.seed!(200)
 d = 2;
 F0 = FourierModel([1.0 * randn(d) for _ in 1:K], 
-    [1.0 * randn(d) for _ in 1:K]);
+    [1.0 * randn(d) for _ in 1:K]); nothing
 ```
 ## Set Parameters and Train
 ```@example ex3
@@ -68,7 +68,7 @@ rwm_sampler = AdaptiveRWMSampler(F0, component_solver!, n_rwm_steps, n_burn, δ)
 
 Random.seed!(1000);
 F = deepcopy(F0);
-Σ_mean, acceptance_rate, loss = train_rwm!(F, data, rwm_sampler,n_epochs, show_progress=false); nothing
+acceptance_rate, loss = train_rwm!(F, data, rwm_sampler,n_epochs, show_progress=false); nothing
 ```
 ## Evaluate Results
 Looking at the trianing loss, we see the model appears to be well trained for the selected width, ``K``:

@@ -64,7 +64,7 @@ rwm_sampler = AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps, n_burn, δ);
 
 Random.seed!(1000); # for reproducibility
 F = deepcopy(F0);
-Σ_mean, acceptance_rate, loss= train_rwm!(F, data, rwm_sampler, n_epochs, show_progress=false); nothing 
+acceptance_rate, loss= train_rwm!(F, data, rwm_sampler, n_epochs, show_progress=false); nothing 
 ```
 ## Evaluate Results
 Looking at the trianing loss, we see the model appears to be well trained for the selected width, ``K``:

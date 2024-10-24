@@ -18,7 +18,6 @@ Data structure containing random walk Metrpolis sampler parameters and structure
 struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:AbstractVecOrMat} <: AbstractRWMSampler
     linear_solve!::TS
     n_rwm_steps::TI
-    n_burn::TI
     β_proposal::TY
     ω_proposal::TX
     Σ::TM
@@ -30,25 +29,24 @@ struct RWMSampler{TS,TI,TM<:AbstractVecOrMat,TR,TMN,TX<:AbstractVecOrMat,TY<:Abs
 end
 
 """
-    RWMSampler(F, linear_solve!, n_rwm_steps, n_burn, Σ, γ, δ, ω_max) 
+    RWMSampler(F, linear_solve!, n_rwm_steps, Σ, γ, δ, ω_max) 
 
 Constructor for the `RWMSampler` data structure
 ### Fields
 * `F` - Fourier feature model; used for setting types and dimensions
 * `linear_solve!` - User specified solver for the normal equations
 * `n_rwm_steps` - Number of internal RWM steps
-* `n_burn` - Number of epochs before the covariance adaptation begins
 * `Σ` - Covariance matrix
 * `γ` - Metropolis-Hastings exponent
 * `δ` - RWM proposal step size
 * `ω_max` - Maximum wave number norm cutoff
 """
-function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
-    return RWMSampler(linear_solve!, n_rwm_steps, n_burn, deepcopy(F.β), deepcopy(F.ω), deepcopy(Σ), γ, δ, TR[], ω_max, MvNormal(Σ))
+function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, Σ::TM, γ::TI, δ::TR, ω_max::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TM<:AbstractMatrix,TR<:AbstractFloat}
+    return RWMSampler(linear_solve!, n_rwm_steps, deepcopy(F.β), deepcopy(F.ω), deepcopy(Σ), γ, δ, TR[], ω_max, MvNormal(Σ))
 end
 
 """
-    RWMSampler(F, linear_solve!, n_rwm_steps, n_burn, δ)
+    RWMSampler(F, linear_solve!, n_rwm_steps, δ)
 
 Constructor for the `RWMSampler` data structure.  Defaults to `ω_max = Inf`, `γ
 = optimal_γ(dx)`, and `Σ= I`
@@ -56,14 +54,13 @@ Constructor for the `RWMSampler` data structure.  Defaults to `ω_max = Inf`, `�
 * `F` - Fourier feature model; used for setting types and dimensions
 * `linear_solve!` - User specified solver for the normal equations
 * `n_rwm_steps` - Number of internal RWM steps
-* `n_burn` - Number of epochs before the covariance adaptation begins
 * `δ` - RWM proposal step size
 """
-function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, n_burn::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
+function RWMSampler(F::TF, linear_solve!::TS, n_rwm_steps::TI, δ::TR) where {TF<:AbstractFourierModel,TS,TI<:Integer,TR<:AbstractFloat}
     ω_max = Inf
     γ = optimal_γ(F.dx)
     Σ = Matrix{TR}(I(F.dx))
-    return RWMSampler(linear_solve!, n_rwm_steps, n_burn, deepcopy(F.β), deepcopy(F.ω), deepcopy(Σ), γ, δ, TR[], ω_max, MvNormal(Σ))
+    return RWMSampler(linear_solve!, n_rwm_steps, deepcopy(F.β), deepcopy(F.ω), deepcopy(Σ), γ, δ, TR[], ω_max, MvNormal(Σ))
 end
 
 

@@ -35,7 +35,6 @@ end
 # end
 
 @testset "Utilities" begin
-    @test include("utils/resample1.jl")
     @test include("utils/utils1.jl")
     @test include("utils/eval1.jl")
     @test include("utils/eval2.jl")
@@ -46,6 +45,9 @@ end
     @test include("utils/bias2.jl")
 end
 
+@testset "Resampling" begin
+    @test include("resample/resample1.jl")
+end
 
 @testset "Training" begin
     @test include("train/train1.jl")

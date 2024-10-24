@@ -39,7 +39,7 @@ let
 
     Random.seed!(1000)
     F = deepcopy(F0)
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, rwm_sampler, n_epochs, show_progress=false)
+    acceptance_rate, loss = train_rwm!(F, data, rwm_sampler, n_epochs, show_progress=false)
 
     norm(F([1.0, 1.0]) - [1.0, 0.0]) < 1e-2
 end

@@ -25,6 +25,7 @@ makedocs(checkdocs=:none,
     pages=[
         "Home" => "index.md",
         "Structures" => ["structs/data.md", "structs/activation.md", "structs/fourier.md"],
+        "Resampling"=>["resample/resample.md"],
         "Training" => ["train/general.md", "train/rwm.md"],
         "Auxiliary Functions and Utilities"=>"aux.md",
         "Examples" => ["examples/example1.md", "examples/example2.md", "examples/example3.md", "examples/vector1.md"]

@@ -59,3 +59,8 @@ optimal_γ
 Following Remark 1 in [kammonen_adaptive_2020](@cite), the optimal ``\gamma``
 corresponds to ``\gamma = 3d -2``, which is encoded in the above function.
 
+```@docs
+trivial_resample!
+trivial_mutate!
+```
+These functions can be used within an [`ARFFSolver`](@ref) data structure.

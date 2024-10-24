@@ -27,6 +27,6 @@ let
     
     Random.seed!(1000) # for reproducibility
     F = deepcopy(F0)
-    Σ_mean, acceptance_rate, loss = train_rwm!(F, data, batch_size, rwm_sampler, n_epochs, show_progress=false)
+    acceptance_rate, loss = train_rwm!(F, data, batch_size, rwm_sampler, n_epochs, show_progress=false)
     abs(F([0.02]) - f(0.02)) < 1e-3
 end

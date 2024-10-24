@@ -73,7 +73,13 @@ end
 """
     trivial_mutate!(F, x, y, S, epoch)
 
-TBW
+Trivial mutation step.  Generally used onmly for testing.
+### Fields
+* `F` - A `FourierModel` structure
+* `x` - vector of x coordinates of training data
+* `y` - vector of y coodriantes of training data
+* `S` - design matrix
+* `epoch` - training epoch
 """
 function trivial_mutate!(F, x, y, S, epoch)
     F
@@ -83,7 +89,14 @@ end
 """
     trivial_resample!(F, x, y, S, epoch)
 
-TBW
+Trivial resampling step.  Used for training strategies which only rely upon
+mutation.
+### Fields
+* `F` - A `FourierModel` structure
+* `x` - vector of x coordinates of training data
+* `y` - vector of y coodriantes of training data
+* `S` - design matrix
+* `epoch` - training epoch
 """
 function trivial_resample!(F, x, y, S, epoch)
     F

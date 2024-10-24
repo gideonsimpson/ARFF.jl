@@ -1,5 +1,5 @@
 """
-    mse_loss(F::ScalarFourierModel{TC,TR,TW}, data_x::Vector{TW}, data_y::Vector{TC}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}}
+    mse_loss(F, data_x, data_y)
 
 Mean squared error loss function
 ### Fields
@@ -13,7 +13,7 @@ end
 
 
 """
-    mse_loss(F::VectorFourierModel{TC,TR,TW,TB}, data_x::Vector{TW}, data_y::Vector{TB}) where {TC<:Complex,TR<:AbstractFloat,TW<:AbstractArray{TR}, TB<:AbstractArray{TC}}
+    mse_loss(F, data_x, data_y)
 
 Mean squared error loss function
 ### Fields

@@ -11,7 +11,7 @@ Perform RWM training of an ARFF model
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, rwm_sampler::TS, n_epochs::TI; 
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AdaptiveRWMSampler}
+    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
     
     N = length(data);
 
@@ -21,7 +21,7 @@ function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,T
     
     loss = train_arff!(F, Iterators.cycle([data]), N, solver, show_progress=show_progress, record_loss=record_loss);
     
-    return rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
+    return rwm_sampler.acceptance_rate, loss
 end
 
 """
@@ -38,7 +38,7 @@ Perform RWM training of an ARFF model with mini batching
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AdaptiveRWMSampler}
+    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
@@ -46,7 +46,7 @@ function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,T
 
     loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, show_progress=show_progress, record_loss=record_loss)
 
-    return rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
+    return rwm_sampler.acceptance_rate, loss
 end
 
 """
@@ -64,7 +64,7 @@ sets
   record
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TY,TI}}, rwm_sampler::TS, n_epochs::TI; 
-        show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AdaptiveRWMSampler} 
+    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(first(data_sets))
 
@@ -74,7 +74,7 @@ function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{Scalar
 
     loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, show_progress=show_progress, record_loss=record_loss)
 
-    return rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
+    return rwm_sampler.acceptance_rate, loss
 end
 
 """
@@ -90,7 +90,7 @@ Perform RWM training of an ARFF model
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AdaptiveRWMSampler}
+    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(data)
 
@@ -100,7 +100,7 @@ function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR
 
     F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, show_progress=show_progress, record_loss=record_loss)
 
-    return F_trajectory, rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
+    return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
 
 """
@@ -117,7 +117,7 @@ Perform RWM training of an ARFF model with mini batching
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AdaptiveRWMSampler}
+    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
@@ -125,7 +125,7 @@ function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR
 
     F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, show_progress=show_progress, record_loss=record_loss)
 
-    return F_trajectory, rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
+    return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
 
 """
@@ -143,7 +143,7 @@ sets
   record
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TY,TI}}, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AdaptiveRWMSampler}
+    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(first(data_sets))
 
@@ -153,5 +153,5 @@ function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{Scal
 
     F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, show_progress=show_progress, record_loss=record_loss)
 
-    return F_trajectory, rwm_sampler.Σ_mean, rwm_sampler.acceptance_rate, loss
+    return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
