@@ -206,7 +206,7 @@ function train_rwm(F₀::ScalarFourierModel{TR,TB,TI,TA}, data_sets, N::TI, batc
 
 
     F = deepcopy(F₀)
-    F_trajectory = tyepof(F)[]
+    F_trajectory = typeof(F)[]
 
     # extract values
     K = length(F)
