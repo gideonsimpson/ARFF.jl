@@ -80,7 +80,7 @@ Perform RWM training an ARFF model, recording the result at all epochs.
 function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver; show_progress=true, record_loss=true) where {TD,TI<:Integer}
 
     F = deepcopy(F₀)
-    F_trajectory = tyepof(F)[]
+    F_trajectory = typeof(F)[]
 
     # extract values
     K = length(F)
