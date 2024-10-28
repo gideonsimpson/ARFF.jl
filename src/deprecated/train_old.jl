@@ -116,7 +116,7 @@ TBW
 function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, Σ, solver::ARFFSolver, options::ARFFOptions; show_progress=true, record_loss=true) where {TD,TI<:Integer}
 
     F = deepcopy(F₀)
-    F_trajectory = tyepof(F)[];
+    F_trajectory = typeof(F)[];
 
     # extract values
     K, dx, _ = size(F)
