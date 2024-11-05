@@ -47,6 +47,7 @@ end
 
 @testset "Resampling" begin
     @test include("resample/resample1.jl")
+    @test include("resample/resample2.jl")
 end
 
 @testset "Training" begin

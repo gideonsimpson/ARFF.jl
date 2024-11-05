@@ -17,9 +17,9 @@ function train_rwm!(F::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,T
     
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
-    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, n_epochs, mse_loss)
+    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, mse_loss)
 
-    loss = train_arff!(F, Iterators.cycle([data]), N, solver, show_progress=show_progress, record_loss=record_loss)
+    loss = train_arff!(F, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
 
     return rwm_sampler.acceptance_rate, loss
 end
@@ -42,9 +42,9 @@ function train_rwm!(F::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,T
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
-    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, n_epochs, mse_loss)
+    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, mse_loss)
 
-    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, show_progress=show_progress, record_loss=record_loss)
+    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
 
     return rwm_sampler.acceptance_rate, loss
 end
@@ -70,9 +70,9 @@ function train_rwm!(F::VectorFourierModel{TR,TY,TI,TA}, data_sets::Vector{Vector
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
-    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, n_epochs, mse_loss)
+    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, show_progress=show_progress, record_loss=record_loss)
+    loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
 
     return rwm_sampler.acceptance_rate, loss
 end
@@ -96,9 +96,9 @@ function train_rwm(F₀::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
-    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, n_epochs, mse_loss)
+    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, show_progress=show_progress, record_loss=record_loss)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
@@ -121,9 +121,9 @@ function train_rwm(F₀::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
-    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, n_epochs, mse_loss)
+    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, show_progress=show_progress, record_loss=record_loss)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
@@ -149,9 +149,9 @@ function train_rwm(F₀::VectorFourierModel{TR,TY,TI,TA}, data_sets::Vector{Vect
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
-    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, n_epochs, mse_loss)
+    solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, show_progress=show_progress, record_loss=record_loss)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end

@@ -9,10 +9,10 @@ Function that performs the resampling step of the training algorithm.
 * `S` - the design matrix
 * `epoch` - the current epoch of the training process
 * `linear_solver!` - an in place solver for the linear system
-* `R = 1.0` - the resampling rule
+* `R = 1.0` - Effective sample size threshold
 """
 function resample!(F, x, y, S, epoch, linear_solver!; R=1.0)
-    K = length(F.ω)
+    K = length(F)
 
     # normalization
     a = sum([norm((F.β)[r, :]) for r in 1:K])
@@ -24,11 +24,9 @@ function resample!(F, x, y, S, epoch, linear_solver!; R=1.0)
         dist = Categorical(p_hat)
         idx_resampled = rand(dist, K)
 
-        # idx_resampled = [idx_original[rand(dist)] for _ in 1:K]
         @. F.ω = F.ω[idx_resampled]
 
-        ARFF.assemble_matrix!(S, F.ϕ, x, F.ω)
-        # solver.linear_solve!(F.β, F.ω, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
+        assemble_matrix!(S, F.ϕ, x, F.ω)
 
         linear_solver!(F.β, F.ω, x, y, S, epoch)
     end

@@ -13,18 +13,14 @@ let
     K = 2^7
     Random.seed!(200) # for reproducibility
     F = FourierModel([1.0 * randn() for _ in 1:K], [randn(d) for _ in 1:K])
-    δ = 10.0 # rwm step size
     λ = 1e-8 # regularization
-
-    linear_solver! = (β, S, y, ω) -> solve_normal!(β, S, y, λ=λ)
+    linear_solver! = (β, ω, x, y, S, epoch) -> solve_normal!(β, S, y, λ=λ)
 
     R = 1.0
 
     S = zeros(typeof(F.β[1, 1]), n_x, K)
-    ARFF.assemble_matrix!(S, F.ϕ, data.x, F.ω)
 
-    resample!(F, linear_solver!, data.x, data.y, S, R)
+    resample!(F, data.x, data.y, S, 0, linear_solver!, R=R)
 
-    F([0.0]) ≈ 1.4839845439477237 + 1.7936518653449696e-5im
-    
+    F([0.0]) ≈ 1.4887395622672144 + 1.4140134462437004e-5im
 end

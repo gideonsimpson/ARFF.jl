@@ -203,6 +203,9 @@ function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFou
             end
         end
     end
+    # update β for final ω values
+    assemble_matrix!(S, F.ϕ, x, F.ω);
+    sampler.linear_solve!(F.β, F.ω, x, y, S, epoch)
 
     if (epoch > 1)
         push!(sampler.acceptance_rate, sampler.acceptance_rate[end] + (accept_ - sampler.acceptance_rate[end]) / epoch)
@@ -261,6 +264,10 @@ function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:Abs
             @set sampler.mv_normal = MvNormal(sampler.Σ_mean)
         end
     end
+    # update β for final ω values
+    assemble_matrix!(S, F.ϕ, x, F.ω)
+    sampler.linear_solve!(F.β, F.ω, x, y, S, epoch)
+
     if (epoch > 1)
         push!(sampler.acceptance_rate, sampler.acceptance_rate[end] + (accept_ - sampler.acceptance_rate[end]) / epoch)
     else
