@@ -85,8 +85,12 @@ In the current version of `ARFF.jl`, the RWM piece is encapsulated inside of a
 ## Notes on Current Training Implementation
 This package has undergone several revisions.  In the current form, one can specify two actions:
 * `resample!` - The resampling step resamples amongs the current set of wave numbers.  Resampling was introduced to the training method for ARFF in [kammonen_adaptive_2024](@cite).
-* `mutate!` - The mutation step is what discovers new weave numbers.  In the current implementation, this corresponds to the RWM step.
-These two procedures are empedded within a [`ARFFSolver`](@ref) structure.
+* `mutate!` - The mutation step is what discovers new weave numbers.  In the
+current implementation, this corresponds to the RWM step. 
+These two procedures are embedded within a [`ARFFSolver`](@ref) structure.
+Furthermore, it is assumed that both of these procedures are implemented so as
+to conclude by calling the linear solver to obtain the updated
+``\boldsymbol{\beta}``. 
 
 ## Acknowledgements
 

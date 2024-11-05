@@ -62,7 +62,7 @@ As noted in [General Training](@ref), the underlying training algorithm for ARFF
 requires the specification of a mutation step.  When we use RWM for that mutation step, as is automatically done for the user in [RWM Training](@ref), and many of our examples, what we are actually doing is first constructing the mutation function, and then embedding it within an `ARFFSolver` data structure, as follows:
 ```@example ex2
 mutate_rwm!(F, x, y, S, epoch) = ARFF.rwm!(F0, rwm_sampler, x, y, S, epoch);
-solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, n_epochs, mse_loss); nothing
+solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss); nothing
 ```
 This example assumes, of course, that you have already constructed the `rwm_sample` object.
 
