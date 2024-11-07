@@ -47,27 +47,23 @@ f(x) = sinint(b1⋅x/ a) * exp(-0.5 * (norm(B*x,2)^2));
 ## Generate data
 ```@example ex4
 dx = 4;
-nx = 10^4;
+nx = 10^3;
 Random.seed!(100) # for reproducibility
 x = [randn(dx) for _ in 1:nx];
 y = f.(x);
-data = DataSet(x, complex.(y));
+data = DataSet(x, y);
 ```
 
 ## Define Training Parameters
 ```@example ex4
-@show K = 2^7;
+@show K = 2^8;
 Random.seed!(200) # for reproducibility
-# F0 = FourierModel([1.0 * randn() for _ in 1:K], [randn(d) for _ in 1:K])
 
-ω0_mean = zeros(dx)
-ω0_cov = 10^2 * I(dx)
-ω0_dist = MvNormal(ω0_mean, ω0_cov)
-F0 = FourierModel([1.0 for _ in 1:K], [rand(ω0_dist) for _ in 1:K])
+F0 = FourierModel([1.0 for _ in 1:K], [10 * rand(dx) for _ in 1:K], SigmoidActivation)
 δ = 0.1 # rwm step size
 λ = 1e-1 # regularization
-n_epochs = 10^4 # number of epochs
-n_rwm_steps = 1 # number of steps between full β updates
+n_epochs = 10^3 # number of epochs
+n_rwm_steps = [5, 5, 1] # number of steps between full β updates for each scenario
 n_burn = n_epochs ÷ 10 # use 10% of the run for burn in
 
 batch_size = 10^3;
@@ -75,17 +71,21 @@ batch_size = 10^3;
 
 ## Define solver and resampler for each R value
 ```@example ex4
-linear_solver! = (β, ω, x, y, S, epoch) -> solve_normal!(β, S, y, λ=λ)
+linear_solver! = (β, ω, x, y, S, epoch) -> solve_normal!(β, S, y, λ=λ) # define linear solver
 
-rwm_sampler = AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps, n_burn, δ);
+rwm_sampler = [AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps_, n_burn, δ) for n_rwm_steps_ in n_rwm_steps]; #define rwm sampler for each R.
 
-mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
+R_vals = [0.0, 0.75, 1.0] # effective sample size thresholds
 
-R_vals = [0.0, 0.8, 1.0]
+mutate_rwm1!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler[1], x, y, S, n) # mutate rwm for R=0.0
+mutate_rwm2!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler[2], x, y, S, n) # mutate rwm for R=0.75
+mutate_rwm3!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler[3], x, y, S, n) # mutate rwm for R=1.0
 
-resampler! = [(F, x, y, S, epoch) -> ARFF.resample!(F, x, y, S, epoch, rwm_sampler.linear_solve!, R=R_) for R_ in R_vals] # resampler for every R value
+mutate_rwm_array = [mutate_rwm1!, mutate_rwm2!, mutate_rwm3!]
 
-solver = [ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, resampler!_, mse_loss) for resampler!_ in resampler!]; # solver for every resampler
+resampler! = [(F, x, y, S, epoch) -> ARFF.resample!(F, x, y, S, epoch, rwm_sampler[i].linear_solve!, R=R_vals[i]) for i in 1:3] # resampler for every R value
+
+solver = [ARFFSolver(rwm_sampler[i].linear_solve!, mutate_rwm_array[i], resampler![i], mse_loss) for i in 1:3]; # solver for every resampler
 ```
 
 ## Train $R=0.0$ Network
@@ -113,11 +113,11 @@ loss3 = train_arff!(G3, Iterators.cycle([data]), batch_size, solver[3], n_epochs
 ```@example ex4
 using LaTeXStrings
 plot(1:n_epochs, loss1, xscale=:log10, yscale = :log10, label = L"R=0.0", legend = :bottomleft)
-plot!(1:n_epochs, loss2, label = L"R=0.8")
+plot!(1:n_epochs, loss2, label = L"R=0.75")
 plot!(1:n_epochs, loss3, label = L"R=1.0")
 xlabel!("number of iterations")
 ylabel!("MSE")
 ```
 
-
+It is worth noting that parameters can be tuned in the above example to get more accurate results. We have noticed that the resampling method shows improvement in some scenarios, but performs similarily to the $R=0.0$ case in others. The performance increase is loosly related to scenarios where we are fitting large data sets and using large $K$ values.
 
