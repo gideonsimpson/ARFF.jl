@@ -30,7 +30,6 @@ using Statistics
 using LinearAlgebra
 using SpecialFunctions
 using Plots
-using LaTeXStrings
 using Distributions
 ```
 
@@ -127,9 +126,9 @@ loss3 = train_arff!(G3, data, batch_size, solver[3], n_epochs, show_progress=fal
 
 ### Compare Loss Curves
 ```@example ex4
-plot(1:n_epochs, loss1, xscale=:log10, yscale = :log10, label = L"R=0.0", legend = :bottomleft)
-plot!(1:n_epochs, loss2, label = L"R=0.75")
-plot!(1:n_epochs, loss3, label = L"R=1.0")
+plot(1:n_epochs, loss1, xscale=:log10, yscale = :log10, label = "R=0.0", legend = :bottomleft)
+plot!(1:n_epochs, loss2, label = "R=0.75")
+plot!(1:n_epochs, loss3, label = "R=1.0")
 xlabel!("Epoch")
 ylabel!("Loss")
 ```
