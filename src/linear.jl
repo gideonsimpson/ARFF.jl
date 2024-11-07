@@ -4,8 +4,8 @@
 
 Assemble the design matrix using the current ω values and x measurement positions with defined features function.
 """
-function assemble_matrix!(S::Matrix{TB}, ϕ::ActivationFunction{TB}, 
-    x_data::Vector{Vector{TF}}, ω_vals::Vector{Vector{TF}}) where {TB<:Number,TF<:AbstractFloat}
+function assemble_matrix!(S::Matrix{TY}, ϕ::ActivationFunction{TY}, 
+    x_data::AbstractVector{TX}, ω_vals::AbstractVector{TX}) where {TY<:Number,TF<:AbstractFloat,TX<:AbstractVector{TF}}
     N = length(x_data)
     K = length(ω_vals)
 
@@ -28,14 +28,13 @@ Solve the regularized linear system using the normal equations.
 * `y_data` - y coordinates
 * `λ = 1e-8` - Regularization parameter
 """
-function solve_normal!(β::Vector{TY}, S::Matrix{TY}, y_data::Vector{TY}; λ=1e-8) where {TY<:Number}
+function solve_normal!(β::AbstractVecOrMat{TY}, S::AbstractMatrix{TY}, y_data::AbstractVecOrMat{TY}; λ=1e-8) where {TY<:Number}
     N = length(y_data)
     
     β .= (S' * S + λ * N * I) \ (S' * y_data)
 
     β
 end
-
 
 """
     solve_normal_svd!(β, S, y_data; λ = 1e-8)
@@ -47,7 +46,7 @@ Solve the regularized linear system using the SVD.
 * `y_data` - y coordinates
 * `λ = 1e-8` - Regularization parameter
 """
-function solve_normal_svd!(β::Vector{TY}, S::Matrix{TY}, y_data::Vector{TY}; λ=1e-8) where {TY<:Number}
+function solve_normal_svd!(β::AbstractVecOrMat{TY}, S::AbstractMatrix{TY}, y_data::AbstractVecOrMat{TY}; λ=1e-8) where {TY<:Number}
 
     F = svd(S)
     N = length(y_data)

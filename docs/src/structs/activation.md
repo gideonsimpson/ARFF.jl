@@ -1,4 +1,4 @@
-# [Activation Functions] (@id activation)
+# [Activation Functions](@id activation)
 While the theory has been developed for the Fourier activation functions of type
 ``e^{i \omega \cdot x}``, this module permits for general activation funcitons
 to be encoded in an `ActivationFunction` data structure.  

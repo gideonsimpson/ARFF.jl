@@ -9,11 +9,12 @@ Structure containing a scalar valued fourier model which will be learned
 * `dx` - Dimension of `x` coordinate
 * `ϕ` - Activation function
 """
-struct ScalarFourierModel{TR,TB,TI,TA} <: AbstractFourierModel where {TB<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TB}}
-    β::Vector{TB}
+struct ScalarFourierModel{TR,TY,TI,TA} <: AbstractFourierModel where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+    β::Vector{TY}
     ω::Vector{Vector{TR}}
     K::TI
     dx::TI
+    dy::TI
     ϕ::TA
 end
 
@@ -47,23 +48,13 @@ function Base.length(F::TF) where {TF<:AbstractFourierModel}
 end
 
 """
-    Base.size(F::TF) where {TF<:ScalarFourierModel}
-
-Returns the tuple `(K, dx)` of the number of terms, `K`, and the dimension of
-the domain, `dx`, of a scalar valued Fourier model.
-"""
-function Base.size(F::TF) where {TF<:ScalarFourierModel}
-    return (F.K, F.dx)
-end
-
-"""
     Base.size(F::TF) where {TF<:VectorFourierModel}
 
 Returns the tuple `(K, dx, dy)` of the number of terms, `K`, the dimension of
 the domain, `dx`, and the dimension of the range, `dy`, of a vector valued
 Fourier model.
 """
-function Base.size(F::TF) where {TF<:VectorFourierModel}
+function Base.size(F::TF) where {TF<:AbstractFourierModel}
     return (F.K, F.dx, F.dy)
 end
 
@@ -109,12 +100,13 @@ Constructor for a Fourier features model. Defaults to complex exponentials for a
 * `β` - Array of coefficients
 * `ω` - Array of wave numbers
 """
-function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}) where {TB <: Number,TR <: AbstractFloat}
+function FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}) where {TY<:Number,TR<:AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
+    dy = 1
     TC = typeof(complex(β[1]))
+    return ScalarFourierModel(complex.(β), ω, K, dx, dy, ActivationFunction{TC}(fourier))
 
-    return ScalarFourierModel(complex.(β), ω, K, dx, ActivationFunction{TC}(fourier))
 end
 
 """
@@ -127,10 +119,11 @@ Constructor for a Fourier features model.
 * `ϕ` - Activation function of `ActivationFunction` type.  The data type of the
   `β` must agree with the data type of the range of `ϕ`.
 """
-function FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TB}}
+function FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}, ϕ::TA) where {TY<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TY}}
     K = length(ω)
     dx = length(ω[1])
-    return ScalarFourierModel(β, ω, K, dx, ϕ)
+    dy = 1
+    return ScalarFourierModel(β, ω, K, dx, dy, ϕ)
 end
 
 """
@@ -141,11 +134,11 @@ Constructor for a Fourier features model. Defaults to complex exponentials for a
 * `β` - Array of coefficients
 * `ω` - Array of wave numbers
 """
-function FourierModel(β::Matrix{TB}, ω::Vector{Vector{TR}}) where {TB<:Number,TR<:AbstractFloat}
+function FourierModel(β::Matrix{TY}, ω::Vector{Vector{TR}}) where {TY<:Number,TR<:AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
-    TC = typeof(complex(β[1,1]))
+    TC = typeof(complex(β[1, 1]))
 
     return VectorFourierModel(complex.(β), ω, K, dx, dy, ActivationFunction{TC}(fourier))
 end
@@ -161,7 +154,7 @@ Constructor for a Fourier features model.
 * `ϕ` - Activation function of `ActivationFunction` type.  The data type of the
   `β` must agree with the data type of the range of `ϕ`.
 """
-function FourierModel(β::Matrix{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
+function FourierModel(β::Matrix{TY}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TY<:Number,TA<:ActivationFunction{TY}}
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
@@ -179,7 +172,7 @@ activation functions.
 * `β` - Array of coefficients
 * `ω` - Array of wave numbers
 """
-function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}) where {TB <: Number, TR <: AbstractFloat}
+function FourierModel(β::Vector{Vector{TY}}, ω::Vector{Vector{TR}}) where {TY <: Number, TR <: AbstractFloat}
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
@@ -204,12 +197,12 @@ activation functions.
 * `ϕ` - Activation function of `ActivationFunction` type.  The data type of the
   `β` must agree with the data type of the range of `ϕ`.
 """
-function FourierModel(β::Vector{Vector{TB}}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TB<:Number,TA<:ActivationFunction{TB}}
+function FourierModel(β::Vector{Vector{TY}}, ω::Vector{Vector{TR}}, ϕ::TA) where {TR<:AbstractFloat,TY<:Number,TA<:ActivationFunction{TY}}
     K = length(ω)
     dx = length(ω[1])
     dy = length(β[1])
 
-    β_ = zeros(TB, K, dx)
+    β_ = zeros(TY, K, dx)
     for k in 1:K
         @. β_[k, :] = β[k]
     end

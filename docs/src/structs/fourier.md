@@ -1,5 +1,5 @@
-# [Fourier Feature Models] (@id fourier)
-The generalized fourier features model approximates functions with ``K`` features, with acvtivation function ``\varphi`` as
+# [Fourier Feature Models](@id fourier)
+The generalized Fourier features model approximates functions with ``K`` features, with acvtivation function ``\varphi`` as
 ```math
 f^\dagger(x) \approx f(x) = \sum_{k=1}^K \beta_k \varphi(x;\omega_k).
 ```
@@ -11,12 +11,17 @@ These are stored in either a scalar or vector valued data structure:
 ARFF.ScalarFourierModel
 ARFF.VectorFourierModel
 ```
+In the vector valued case, the ``\beta_k``'s are stored in a matrix of size ``K\times d_y``, while they are stored as a column vector in hte scalar case.
+
 ## Constructing a Fourier Features Model
 A Fourier features model can be instantiated with:
 ```@docs
-    FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}) where {TB <: Number,TR <: AbstractFloat}
-    FourierModel(β::Vector{TB}, ω::Vector{Vector{TR}}, ϕ::TA) where {TB<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TB}}
+ARFF.FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}) where {TY<:Number,TR<:AbstractFloat}
+ARFF.FourierModel(β::Vector{TY}, ω::Vector{Vector{TR}}, ϕ::TA) where {TY<:Number,TR<:AbstractFloat,TA<:ActivationFunction{TY}}
 ```
+For the vector valued case, `β` may be passed in as a `(K, dy)` sized matrix, or as a vector of length `K` containing vectors of size `dy`.  In this latter case, it is transformed over to the matrix layout.
+
+
 As an example, the scalar valued Fourier model with complex exponentials can be
 instantiated as:
 ```@example 1

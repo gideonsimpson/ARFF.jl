@@ -1,0 +1,10 @@
+# ARFFSolver
+In the most general case, when a user calls `train_arff!` or `train_arff`, they must provide an `ARFFSolver` data structure:
+```@docs
+ARFF.ARFFSolver
+```
+The expectations for these functions are as follows:
+* `linear_solve!(β, ω, x, y, S, epoch)`: `β` and `ω` are the coefficients and wave numbers;  `(x,y)` are arrays of training pairs; `S` is the design matrix; and `epoch` is the current epoch.  Not all arguments are neccessarily used, but this is how the solver will be called.
+* `mutate!(F, x, y, S, epoch)`:  `F` is the Fourier model; `(x,y)` are arrays of training pairs; `S` is the design matrix; and `epoch` is the current epoch.
+* `resample!(F, x, y, S, epoch)`: This follows the convetion of `mutate!`
+* `loss(F, x, y)`: `F` is the Fourier model; and `(x,y)` are arrays of training pairs.
