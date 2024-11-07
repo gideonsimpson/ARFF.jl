@@ -23,7 +23,6 @@ B = \begin{bmatrix}
 In our example, we will use $a = 10^{-2}$.
 
 ```@setup ex4
-using Revise
 using ARFF
 using Random
 using Statistics
