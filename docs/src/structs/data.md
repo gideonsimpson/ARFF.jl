@@ -41,7 +41,7 @@ data = DataSet(x,y);
 println(data.x)
 println(data.y)
 ```
-## [Scaling Data Sets] (@id scalings)
+## [Scaling Data Sets](@id scalings)
 It is often helpful to scale the training data (setting means to zero and variances to unity).  These can be accomplished with the scalings structure and the associated functions.
 ```@docs
     get_scalings

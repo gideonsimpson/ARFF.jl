@@ -52,7 +52,7 @@ This defaults to complex exponential activation functions.
 
 ## Set Parameters and Train
 ```@example ex1
-δ = 10.; # rwm step size
+δ = .1; # rwm step size
 λ = 1e-6; # regularization
 n_epochs = 10^3; # number of epochs
 n_rwm_steps = 10; # number of RWM steps during mutation

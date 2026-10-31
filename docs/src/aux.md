@@ -3,7 +3,7 @@
 Pages = ["aux.md"]
 ```
 
-## [Linear Algebra] (@id linalg)
+## [Linear Algebra](@id linalg)
 It is essential to be able solve for the updated ``\boldsymbol{\beta}`` when we update the ``\boldsymbol{\omega}``.  In a typical setting, this corresponds to solving
 ```math
 ({S^\ast}S + N \lambda I)\boldsymbol{\beta} = S^\ast \boldsymbol{y},
