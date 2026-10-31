@@ -3,7 +3,7 @@ module ARFF
 using LinearAlgebra
 using Distributions
 using Statistics
-using Accessors
+
 using ProgressMeter
 #using Flux
 include("types.jl")
