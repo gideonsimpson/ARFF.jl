@@ -84,7 +84,7 @@ Data structure containing adaptive random walk Metrpolis sampler parameters and 
 * `Σ_mean` - Time averaged covariance matrix
 * `mv_normal` - Multivariate normal for RWM
 """
-struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<:AbstractVecOrMat} <: AbstractRWMSampler
+mutable struct AdaptiveRWMSampler{TS,TI,TM<:AbstractMatrix,TR,TMN,TX<:AbstractVector,TY<:AbstractVecOrMat} <: AbstractRWMSampler
     linear_solve!::TS
     n_rwm_steps::TI
     n_burn::TI
@@ -261,7 +261,7 @@ function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:Abs
         @. sampler.ω_mean += (sampler.ω_mean_ - sampler.ω_mean) / l
         # switch to dynamic covariance matrix ater i n_burn epochs
         if (epoch > sampler.n_burn)
-            @set sampler.mv_normal = MvNormal(sampler.Σ_mean)
+            sampler.mv_normal = MvNormal(sampler.Σ_mean)
         end
     end
     # update β for final ω values

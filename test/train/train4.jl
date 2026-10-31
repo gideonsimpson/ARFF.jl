@@ -13,7 +13,7 @@ let
     K = 2^7
     Random.seed!(200) # for reproducibility
     F0 = FourierModel([1.0 * randn() for _ in 1:K], [randn(d) for _ in 1:K])
-    δ = 10.0 # rwm step size
+    δ = 0.1 # rwm step size
     λ = 1e-8 # regularization
     n_epochs = 10^3 # number of epochs
     batch_size = 50
@@ -28,5 +28,35 @@ let
     Random.seed!(1000) # for reproducibility
     F = deepcopy(F0)
     acceptance_rate, loss = train_rwm!(F, data, batch_size, rwm_sampler, n_epochs, show_progress=false)
-    abs(F([0.02]) - f(0.02)) < 1e-3
+    # abs(F([0.02]) - f(0.02)) < 1e-3
+
+    err = abs(F([0.02]) - f(0.02));
+    @test isapprox(rwm_sampler.mv_normal.Σ, rwm_sampler.Σ_mean; rtol=1e-10);
+
+# Σ_mean =
+#     final_sampler.Σ_mean[1, 1]
+
+# Σ_proposal =
+#     final_sampler.mv_normal.Σ[1, 1]
+
+# Σ_empirical =
+#     cov(F.ω; corrected=false)[1, 1]
+
+# println("approximation error = ", err)
+# println("acceptance rate      = ", acceptance_rate[end])
+# println("Σ_mean               = ", Σ_mean)
+# println("proposal Σ           = ", Σ_proposal)
+# println(
+#     "proposal scale        = ",
+#     δ * sqrt(Σ_proposal),
+# )
+# println("empirical Σ          = ", Σ_empirical)
+# println("max |ω|              = ", maximum(norm, F.ω))
+# println("mean |ω|             = ", mean(norm, F.ω))
+# println(
+#     "empirical/adapted     = ",
+#     Σ_empirical / Σ_mean,
+# )
+
+    err < 1e-3
 end
