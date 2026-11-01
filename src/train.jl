@@ -10,8 +10,9 @@ Perform RWM training in place on an ARFF model
 * `n_epochs` - Number of training epochs
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
+* `epoch_offset=0` - Offset for the epoch numbers
 """
-function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true) where {TD,TI<:Integer}
+function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TD,TI<:Integer}
 
     # extract values
     K = length(F)
@@ -29,15 +30,17 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
         rows = sample(1:N, batch_size, replace=false)
     end
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x, rows), F.ω)
-    solver.linear_solve!(F.β, F.ω, subsample(Iterators.first(data_sets).x, rows), subsample(Iterators.first(data_sets).y_mat, rows), S, 0)
+    solver.linear_solve!(F.β, F.ω, subsample(Iterators.first(data_sets).x, rows), subsample(Iterators.first(data_sets).y_mat, rows), S, epoch_offset)
     # solver.linear_solve!(F, )
 
     pmeter = Progress(n_epochs; enabled=show_progress)
 
-    for (epoch, data) in enumerate(data_sets)
-        if epoch > n_epochs
+    for (local_epoch, data) in enumerate(data_sets)
+        if local_epoch > n_epochs
             break
         end
+    
+        epoch = epoch_offset + local_epoch
 
         loss_ = 0
         if (batch_size < N)
@@ -73,8 +76,9 @@ Perform RWM training an ARFF model, recording the result at all epochs.
 * `n_epochs` - Number of training epochs
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
+* `epoch_offset=0` - Offset for the epoch numbers
 """
-function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true) where {TD,TI<:Integer}
+function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TD,TI<:Integer}
 
     F = deepcopy(F₀)
     F_trajectory = typeof(F)[]
@@ -97,10 +101,12 @@ function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, s
     
     pmeter = Progress(n_epochs; enabled=show_progress)
 
-    for (epoch, data) in enumerate(data_sets)
-        if epoch > n_epochs
+    for (local_epoch, data) in enumerate(data_sets)
+        if local_epoch > n_epochs
             break
         end
+
+        epoch = epoch_offset + local_epoch
 
         loss_ = 0
         if (batch_size < N)

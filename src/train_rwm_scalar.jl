@@ -9,9 +9,10 @@ Perform RWM training of an ARFF model
 * `n_epochs` - Number of training epochs
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
+* `epoch_offset=0` - Offset for the epoch numbers
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, rwm_sampler::TS, n_epochs::TI; 
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
     
     N = length(data);
 
@@ -19,7 +20,7 @@ function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,T
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
     
-    loss = train_arff!(F, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
+    loss = train_arff!(F, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
     
     return rwm_sampler.acceptance_rate, loss
 end
@@ -36,15 +37,16 @@ Perform RWM training of an ARFF model with mini batching
 * `n_epochs` - Number of training epochs
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
+* `epoch_offset=0` - Offset for the epoch numbers
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
+    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
 
     return rwm_sampler.acceptance_rate, loss
 end
@@ -62,9 +64,10 @@ sets
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and
   record
+* `epoch_offset=0` - Offset for the epoch numbers
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TY,TI}}, rwm_sampler::TS, n_epochs::TI; 
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(first(data_sets))
 
@@ -72,7 +75,7 @@ function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{Scalar
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
+    loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
 
     return rwm_sampler.acceptance_rate, loss
 end
@@ -88,9 +91,10 @@ Perform RWM training of an ARFF model
 * `n_epochs` - Number of training epochs
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
+* `epoch_offset=0` - Offset for the epoch numbers
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(data)
 
@@ -98,7 +102,7 @@ function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
@@ -115,15 +119,16 @@ Perform RWM training of an ARFF model with mini batching
 * `n_epochs` - Number of training epochs
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
+* `epoch_offset=0` - Offset for the epoch numbers
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
@@ -141,9 +146,10 @@ sets
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and
   record
+* `epoch_offset=0` - Offset for the epoch numbers
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TY,TI}}, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(first(data_sets))
 
@@ -151,7 +157,7 @@ function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{Scal
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
