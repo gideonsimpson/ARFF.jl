@@ -98,6 +98,8 @@ function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, s
     if (batch_size < N)
         rows = sample(1:N, batch_size, replace=false)
     end
+    assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x, rows), F.ω)
+    solver.linear_solve!(F.β, F.ω, subsample(Iterators.first(data_sets).x, rows), subsample(Iterators.first(data_sets).y_mat, rows), S, epoch_offset)
     
     pmeter = Progress(n_epochs; enabled=show_progress)
 
