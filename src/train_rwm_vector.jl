@@ -17,11 +17,12 @@ function train_rwm!(F::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,T
     
     N = length(data)
     
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
+    mutate_rwm!(F, x, y, S, n; rng=Random.default_rng()) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, mse_loss)
 
-    loss = train_arff!(F, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    loss = train_arff!(F, Iterators.cycle([data]), N, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng);
 
     return rwm_sampler.acceptance_rate, loss
 end
@@ -44,11 +45,12 @@ Perform RWM training of an ARFF model with mini batching
 function train_rwm!(F::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
     show_progress=true, record_loss=true,epoch_offset=0,rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
+    mutate_rwm!(F, x, y, S, n; rng=Random.default_rng()) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, mse_loss)
 
-    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng);
 
     return rwm_sampler.acceptance_rate, loss
 end
@@ -70,15 +72,16 @@ sets
 * `rng=Random.default_rng()` - Random number generator
 """
 function train_rwm!(F::VectorFourierModel{TR,TY,TI,TA}, data_sets::Vector{VectorDataSet{TR,TY,TI}}, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true,epoch_offset=0,rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0, rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(first(data_sets))
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
+    mutate_rwm!(F, x, y, S, n; rng=Random.default_rng()) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng);
 
     return rwm_sampler.acceptance_rate, loss
 end
@@ -102,11 +105,12 @@ function train_rwm(F₀::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR
 
     N = length(data)
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
+    mutate_rwm!(F, x, y, S, n; rng=Random.default_rng()) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng);
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
@@ -129,11 +133,12 @@ Perform RWM training of an ARFF model with mini batching
 function train_rwm(F₀::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
     show_progress=true, record_loss=true,epoch_offset=0, rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
+    mutate_rwm!(F, x, y, S, n; rng=Random.default_rng()) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, ARFF.trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng);
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end
@@ -159,11 +164,12 @@ function train_rwm(F₀::VectorFourierModel{TR,TY,TI,TA}, data_sets::Vector{Vect
 
     N = length(first(data_sets))
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
+    mutate_rwm!(F, x, y, S, n; rng=Random.default_rng()) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng);
 
     return F_trajectory, rwm_sampler.acceptance_rate, loss
 end

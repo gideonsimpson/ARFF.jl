@@ -10,10 +10,14 @@ Perform ARFF training on a given data set
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
-function train_arff!(F::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+function train_arff!(F::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, solver::ARFFSolver, n_epochs::TI; 
+    show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+    
     N = length(data);
-    loss = train_arff!(F, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset);
+    loss = train_arff!(F, Iterators.cycle([data]), N, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng);
     return loss
 end
 
@@ -30,9 +34,13 @@ Perform ARFF training on a given data set with minibatching
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
-function train_arff!(F::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
-    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+function train_arff!(F::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, batch_size::TI, solver::ARFFSolver, n_epochs::TI;
+        show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+    
+    loss = train_arff!(F, Iterators.cycle([data]), batch_size, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng)
     return loss
 end
 
@@ -48,10 +56,14 @@ Perform ARFF training on a given data set with minibatching
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
-function train_arff!(F::VectorFourierModel{TR,TY,TI,TA}, data_sets::Vector{VectorDataSet{TR,TY,TI}}, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+function train_arff!(F::VectorFourierModel{TR,TY,TI,TA}, data_sets::Vector{VectorDataSet{TR,TY,TI}}, solver::ARFFSolver, n_epochs::TI;
+        show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+    
     N = length(first(data_sets))
-    loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    loss = train_arff!(F, Iterators.cycle(data_sets), N, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng)
     return loss
 end
 
@@ -68,10 +80,14 @@ Perform RWM training an ARFF model, recording the result at all epochs.
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
-function train_arff(F₀::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+function train_arff(F₀::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, solver::ARFFSolver, n_epochs::TI;
+        show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+    
     N = length(data)
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), N, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng)
     return F_trajectory, loss
 end
 
@@ -88,9 +104,13 @@ Perform RWM training an ARFF model, recording the result at all epochs.
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
-function train_arff(F₀::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+function train_arff(F₀::VectorFourierModel{TR,TY,TI,TA}, data::VectorDataSet{TR,TY,TI}, batch_size::TI, solver::ARFFSolver, n_epochs::TI; 
+    show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+    
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle([data]), batch_size, solver, n_epochs; 
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng)
     return F_trajectory, loss
 end
 
@@ -106,9 +126,13 @@ Perform RWM training an ARFF model, recording the result at all epochs.
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
-function train_arff(F₀::VectorFourierModel{TR,TY,TI,TA}, data_sets::Vector{VectorDataSet{TR,TY,TI}}, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+function train_arff(F₀::VectorFourierModel{TR,TY,TI,TA}, data_sets::Vector{VectorDataSet{TR,TY,TI}}, solver::ARFFSolver, n_epochs::TI;
+    show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY}}
+    
     N = length(first(data_sets))
-    F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, n_epochs, show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset)
+    F_trajectory, loss = train_arff(F₀, Iterators.cycle(data_sets), N, solver, n_epochs;
+        show_progress=show_progress, record_loss=record_loss, epoch_offset=epoch_offset, rng=rng)
     return F_trajectory, loss
 end

@@ -1,5 +1,5 @@
 """
-    train_arff!(F, data_sets, batch_size, solver, n_epochs; show_progress=true, record_loss=true) 
+    train_arff!(F, data_sets, batch_size, solver, n_epochs; show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) 
 
 Perform RWM training in place on an ARFF model
 ### Fields
@@ -11,8 +11,9 @@ Perform RWM training in place on an ARFF model
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
-function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TD,TI<:Integer}
+function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) where {TD,TI<:Integer}
 
     # extract values
     K = length(F)
@@ -27,7 +28,7 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
     # fit initial coefficients
     rows = 1:N
     if (batch_size < N)
-        rows = sample(1:N, batch_size, replace=false)
+        rows = sample(rng, 1:N, batch_size, replace=false)
     end
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x, rows), F.ω)
     solver.linear_solve!(F.β, F.ω, subsample(Iterators.first(data_sets).x, rows), subsample(Iterators.first(data_sets).y_mat, rows), S, epoch_offset)
@@ -44,13 +45,13 @@ function train_arff!(F::AbstractFourierModel, data_sets::TD, batch_size::TI, sol
 
         loss_ = 0
         if (batch_size < N)
-            rows = sample(1:N, batch_size, replace=false)
+            rows = sample(rng, 1:N, batch_size, replace=false)
         end
         # resample
-        solver.resample!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
+        solver.resample!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch, rng=rng)
 
         # perform mutation step
-        solver.mutate!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch);
+        solver.mutate!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch, rng=rng);
 
         # record loss
         if record_loss
@@ -77,8 +78,9 @@ Perform RWM training an ARFF model, recording the result at all epochs.
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
-function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0) where {TD,TI<:Integer}
+function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, solver::ARFFSolver, n_epochs::TI; show_progress=true, record_loss=true, epoch_offset=0, rng=Random.default_rng()) where {TD,TI<:Integer}
 
     F = deepcopy(F₀)
     F_trajectory = typeof(F)[]
@@ -96,7 +98,7 @@ function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, s
     # fit initial coefficients
     rows = 1:N
     if (batch_size < N)
-        rows = sample(1:N, batch_size, replace=false)
+        rows = sample(rng, 1:N, batch_size, replace=false)
     end
     assemble_matrix!(S, F.ϕ, subsample(Iterators.first(data_sets).x, rows), F.ω)
     solver.linear_solve!(F.β, F.ω, subsample(Iterators.first(data_sets).x, rows), subsample(Iterators.first(data_sets).y_mat, rows), S, epoch_offset)
@@ -112,13 +114,13 @@ function train_arff(F₀::AbstractFourierModel, data_sets::TD, batch_size::TI, s
 
         loss_ = 0
         if (batch_size < N)
-            rows = sample(1:N, batch_size, replace=false)
+            rows = sample(rng, 1:N, batch_size, replace=false)
         end
         # resample
-        solver.resample!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
+        solver.resample!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch, rng=rng)
 
         # perform mutation step
-        solver.mutate!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch)
+        solver.mutate!(F, subsample(data.x, rows), subsample(data.y_mat, rows), S, epoch, rng=rng)
 
         # perform full β update
         assemble_matrix!(S, F.ϕ, subsample(data.x, rows), F.ω)

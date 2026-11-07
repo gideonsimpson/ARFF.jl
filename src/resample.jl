@@ -10,8 +10,9 @@ Function that performs the resampling step of the training algorithm.
 * `epoch` - the current epoch of the training process
 * `linear_solver!` - an in place solver for the linear system
 * `R = 1.0` - Effective sample size threshold
+* `rng=Random.default_rng()` - Random number generator
 """
-function resample!(F, x, y, S, epoch, linear_solver!; R=1.0)
+function resample!(F, x, y, S, epoch, linear_solver!; R=1.0, rng=Random.default_rng())
     K = length(F)
 
     # normalization
@@ -22,7 +23,7 @@ function resample!(F, x, y, S, epoch, linear_solver!; R=1.0)
 
     if K_ess ≤ R * K
         dist = Categorical(p_hat)
-        idx_resampled = rand(dist, K)
+        idx_resampled = rand(rng, dist, K)
 
         @. F.ω = F.ω[idx_resampled]
 

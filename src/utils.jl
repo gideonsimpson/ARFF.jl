@@ -80,8 +80,10 @@ Trivial mutation step.  Generally used onmly for testing.
 * `y` - vector of y coodriantes of training data
 * `S` - design matrix
 * `epoch` - training epoch
+* `rng=Random.default_rng()` - Random number generator
+
 """
-function trivial_mutate!(F, x, y, S, epoch)
+function trivial_mutate!(F, x, y, S, epoch; rng=Random.default_rng())
     F
 
 end
@@ -97,7 +99,8 @@ mutation.
 * `y` - vector of y coodriantes of training data
 * `S` - design matrix
 * `epoch` - training epoch
+* `rng=Random.default_rng()` - Random number generator
 """
-function trivial_resample!(F, x, y, S, epoch)
+function trivial_resample!(F, x, y, S, epoch; rng=Random.default_rng())
     F
 end
