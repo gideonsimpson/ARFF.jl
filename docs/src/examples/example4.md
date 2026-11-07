@@ -86,13 +86,13 @@ rwm_sampler = [AdaptiveRWMSampler(F0, linear_solver!, n_rwm_steps_, n_burn, δ) 
 
 R_vals = [0.0, 0.75, 1.0] # effective sample size thresholds
 
-mutate_rwm1!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler[1], x, y, S, n) # mutate rwm for R=0.0
-mutate_rwm2!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler[2], x, y, S, n) # mutate rwm for R=0.75
-mutate_rwm3!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler[3], x, y, S, n) # mutate rwm for R=1.0
+mutate_rwm1!(F, x, y, S, n; rng=Random.default_rng()) = ARFF.rwm!(F, rwm_sampler[1], x, y, S, n; rng=rng) # mutate rwm for R=0.0
+mutate_rwm2!(F, x, y, S, n; rng=Random.default_rng()) = ARFF.rwm!(F, rwm_sampler[2], x, y, S, n; rng=rng) # mutate rwm for R=0.75
+mutate_rwm3!(F, x, y, S, n; rng=Random.default_rng())  = ARFF.rwm!(F, rwm_sampler[3], x, y, S, n; rng=rng) # mutate rwm for R=1.0
 
 mutate_rwm_array = [mutate_rwm1!, mutate_rwm2!, mutate_rwm3!]
 
-resampler! = [(F, x, y, S, epoch) -> ARFF.resample!(F, x, y, S, epoch, rwm_sampler[i].linear_solve!, R=R_vals[i]) for i in 1:3] # resampler for every R value
+resampler! = [(F, x, y, S, epoch; rng=Random.default_rng()) -> ARFF.resample!(F, x, y, S, epoch, rwm_sampler[i].linear_solve!; R=R_vals[i], rng=rng) for i in 1:3] # resampler for every R value
 
 solver = [ARFFSolver(rwm_sampler[i].linear_solve!, mutate_rwm_array[i], resampler![i], mse_loss) for i in 1:3]; # solver for every resampler 
 nothing;
@@ -104,7 +104,7 @@ This example corresponds to pure RWM; no resampling takes place.
 ```@example ex4
 Random.seed!(1000) # for reproducibility
 G1 = deepcopy(F0)
-loss1 = train_arff!(G1,data, batch_size, solver[1], n_epochs, show_progress=false);nothing;
+loss1 = train_arff!(G1,data, batch_size, solver[1], n_epochs; show_progress=false);nothing;
 ```
 
 ### Train $R=0.8$ Network
@@ -112,7 +112,7 @@ In this case, resampling takes place when the ESS falls beneath ``R \cdot K``.
 ```@example ex4
 Random.seed!(1000) # for reproducibility
 G2 = deepcopy(F0)
-loss2 = train_arff!(G2, data, batch_size, solver[2], n_epochs, show_progress=false); nothing;
+loss2 = train_arff!(G2, data, batch_size, solver[2], n_epochs; show_progress=false); nothing;
 ```
 
 ### Train $R=1.0$ Network
@@ -120,7 +120,7 @@ In this case, resampling takes place at every step.
 ```@example ex4
 Random.seed!(1000) # for reproducibility
 G3 = deepcopy(F0)
-loss3 = train_arff!(G3, data, batch_size, solver[3], n_epochs, show_progress=false); nothing;
+loss3 = train_arff!(G3, data, batch_size, solver[3], n_epochs; show_progress=false); nothing;
 ```
 
 ### Compare Loss Curves
