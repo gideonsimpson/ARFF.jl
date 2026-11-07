@@ -3,6 +3,7 @@ module ARFF
 using LinearAlgebra
 using Distributions
 using Statistics
+using Random
 
 using ProgressMeter
 #using Flux

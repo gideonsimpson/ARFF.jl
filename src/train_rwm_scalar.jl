@@ -10,13 +10,14 @@ Perform RWM training of an ARFF model
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, rwm_sampler::TS, n_epochs::TI; 
-    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0,rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
     
     N = length(data);
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n);
+    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng);
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
     
@@ -38,11 +39,12 @@ Perform RWM training of an ARFF model with mini batching
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0,rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
+    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
@@ -65,13 +67,14 @@ sets
 * `record_loss=true` - Evaluate the specified loss function at each epoch and
   record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
 function train_rwm!(F::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TY,TI}}, rwm_sampler::TS, n_epochs::TI; 
-    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0,rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(first(data_sets))
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
+    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
@@ -92,13 +95,14 @@ Perform RWM training of an ARFF model
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0,rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(data)
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
+    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
@@ -120,11 +124,12 @@ Perform RWM training of an ARFF model with mini batching
 * `show_progress=true` - Display training progress using `ProgressMeter`
 * `record_loss=true` - Evaluate the specified loss function at each epoch and record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data::ScalarDataSet{TR,TY,TI}, batch_size::TI, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0,rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
+    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 
@@ -147,13 +152,14 @@ sets
 * `record_loss=true` - Evaluate the specified loss function at each epoch and
   record
 * `epoch_offset=0` - Offset for the epoch numbers
+* `rng=Random.default_rng()` - Random number generator
 """
 function train_rwm(F₀::ScalarFourierModel{TR,TY,TI,TA}, data_sets::Vector{ScalarDataSet{TR,TY,TI}}, rwm_sampler::TS, n_epochs::TI;
-    show_progress=true, record_loss=true,epoch_offset=0) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
+    show_progress=true, record_loss=true,epoch_offset=0,rng=Random.default_rng()) where {TY<:Number,TR<:AbstractFloat,TI<:Integer,TA<:ActivationFunction{TY},TS<:AbstractRWMSampler}
 
     N = length(first(data_sets))
 
-    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n)
+    mutate_rwm!(F, x, y, S, n) = ARFF.rwm!(F, rwm_sampler, x, y, S, n,rng=rng)
 
     solver = ARFFSolver(rwm_sampler.linear_solve!, mutate_rwm!, trivial_resample!, mse_loss)
 

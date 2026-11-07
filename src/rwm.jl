@@ -181,21 +181,22 @@ Perform random walk Metrpolis with the specified parameters
 * `y` - y coordinates from data used during RWM
 * `S` - S matrix used during RWM
 * `epoch` - Current training epoch
+* `rng` - Random number generator
 """
-function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
+function rwm!(F::TF, sampler::RWMSampler, x, y, S, epoch;rng=Random.default_rng()) where {TF<:AbstractFourierModel}
     K = length(F);
     accept_ = 0.0
 
     for j in 1:sampler.n_rwm_steps
         # generate proposal
 
-        @. sampler.ω_proposal = F.ω + sampler.δ * rand((sampler.mv_normal,))
+        @. sampler.ω_proposal = F.ω + sampler.δ * rand(rng, (sampler.mv_normal,))
         assemble_matrix!(S, F.ϕ, x, sampler.ω_proposal)
         sampler.linear_solve!(sampler.β_proposal, sampler.ω_proposal, x, y, S, epoch)
 
         # apply Metroplis step
         for k in 1:K
-            ζ = rand()
+            ζ = rand(rng)
             if (likelihood(subsample(sampler.β_proposal, k), subsample(F.β, k), sampler.γ) > ζ) && (norm(sampler.ω_proposal[k]) < sampler.ω_max)
                 copy_entries!(F.ω, sampler.ω_proposal, k)
                 copy_entries!(F.β, sampler.β_proposal, k)
@@ -225,20 +226,21 @@ end
 * `y` - y coordinates from data used during RWM
 * `S` - S matrix used during RWM
 * `epoch` - Current training epoch
+* `rng` - Random number generator
 """
-function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch) where {TF<:AbstractFourierModel}
+function rwm!(F::TF, sampler::AdaptiveRWMSampler, x, y, S, epoch;rng=Random.default_rng(),) where {TF<:AbstractFourierModel}
     K = length(F)
     accept_ = 0.0
     for j in 1:sampler.n_rwm_steps
         # generate proposal
 
-        @. sampler.ω_proposal = F.ω + sampler.δ * rand((sampler.mv_normal,))
+        @. sampler.ω_proposal = F.ω + sampler.δ * rand(rng, (sampler.mv_normal,))
         assemble_matrix!(S, F.ϕ, x, sampler.ω_proposal)
         sampler.linear_solve!(sampler.β_proposal, sampler.ω_proposal, x, y, S, epoch)
 
         # apply Metroplis step
         for k in 1:K
-            ζ = rand()
+            ζ = rand(rng)
             if (likelihood(subsample(sampler.β_proposal, k), subsample(F.β, k), sampler.γ) > ζ) && (norm(sampler.ω_proposal[k]) < sampler.ω_max)
                 copy_entries!(F.ω, sampler.ω_proposal, k)
                 copy_entries!(F.β, sampler.β_proposal, k)
